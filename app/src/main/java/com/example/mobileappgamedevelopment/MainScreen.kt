@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,25 +24,35 @@ fun MainScreen(Username: String) {
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center // Center the content vertically and horizontally
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            // Greeting Text
-            Text(
-                text = "Welcome, $Username!",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Additional Content (Optional)
-            Text(
-                text = "You are now logged in.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        }
+        OpengGLComposable(
+            modifier = Modifier.
+            fillMaxSize()
+        )
+//        Column(
+//            horizontalAlignment = Alignment.CenterHorizontally,
+//            verticalArrangement = Arrangement.Center
+//        ) {
+//            // Greeting Text
+//            Text(
+//                text = "Welcome, $Username!",
+//                style = MaterialTheme.typography.headlineMedium,
+//                color = MaterialTheme.colorScheme.primary
+//            )
+//
+//            Spacer(modifier = Modifier.height(16.dp))
+//
+//            // Additional Content (Optional)
+//            Text(
+//                text = "You are now logged in.",
+//                style = MaterialTheme.typography.bodyLarge,
+//                color = MaterialTheme.colorScheme.onBackground
+//            )
+//
+//            OpengGLComposable(
+//                modifier = Modifier.
+//                fillMaxWidth().
+//                height(300.dp)
+//            )
+//        }
     }
 }

@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
                     modifier =Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NavHost(navController = navController, startDestination = Screen.Login.route) {
+                    NavHost(navController = navController, startDestination = Screen.Main("").route) {
                         composable(Screen.Login.route) {
                             val navigationHelper = remember { NavigationHelper(navController) }
                             LoginScreen(
