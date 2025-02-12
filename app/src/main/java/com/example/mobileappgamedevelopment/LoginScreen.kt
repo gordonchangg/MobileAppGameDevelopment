@@ -31,7 +31,7 @@ import com.google.firebase.auth.FirebaseAuth
 fun LoginScreen(
     navigationHelper: NavigationHelper
 ) {
-    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
 
@@ -59,9 +59,9 @@ fun LoginScreen(
 
             // Username Input Field
             TextField(
-                value = username,
-                onValueChange = { username = it },
-                label = { Text("Username") },
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.textFieldColors(
@@ -95,15 +95,15 @@ fun LoginScreen(
             // Login Button
             Button(
                 onClick = {
-                    if (username.isEmpty() || password.isEmpty()) {
+                    if (email.isEmpty() || password.isEmpty()) {
                         errorMessage = "All fields are required"
                     } else {
                         // Authenticate user with Firebase
-                        auth.signInWithEmailAndPassword(username, password)
+                        auth.signInWithEmailAndPassword(email, password)
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
                                     // Login successful, navigate to Main screen
-                                    navigationHelper.navigateToMain(username)
+                                    navigationHelper.navigateToMain(email)
                                 } else {
                                     // Handle errors (e.g., invalid credentials)
                                     errorMessage = task.exception?.localizedMessage ?: "Login failed"

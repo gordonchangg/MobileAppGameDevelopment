@@ -20,6 +20,9 @@ class OpenGLRenderer(private val context: Context) : GLSurfaceView.Renderer {
     override fun onSurfaceCreated(unused: GL10, config: EGLConfig) {
         GLES20.glClearColor(0.1f,0.1f,0.1f,1.0f)
 
+        GLES20.glEnable(GLES20.GL_BLEND)
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+
         val vertexShaderCode = """
             uniform mat4 uMVPMatrix;
             attribute vec4 vPosition;
@@ -47,20 +50,12 @@ class OpenGLRenderer(private val context: Context) : GLSurfaceView.Renderer {
         entityManager = EntityManager(context)
 
         entityManager.createBackgroundEntity(R.drawable.placeholder_bg)
-
-        val entityA = entityManager.createEntity(R.drawable.placeholder_customer)
-        entityA.position = floatArrayOf(-0.5f, 0f, 0f)
-        entityA.scale = floatArrayOf(0.5f, 0.5f, 1f)
-        entityA.rotation = 45f
-
-        val entityB = entityManager.createEntity(R.drawable.placeholder_customer)
-        entityB.position = floatArrayOf(0.5f, 0f, 0f)
-        entityB.scale = floatArrayOf(0.75f, 0.75f, 1f)
-        entityB.rotation = -30f
     }
 
     override fun onDrawFrame(unused: GL10) {
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+
+        entityManager.processTextureLoadQueue()
 
         Matrix.setLookAtM(viewMatrix, 0, 0f, 0f, 3f, 0f, 0f, 0f, 0f, 1.0f, 0.0f)
 

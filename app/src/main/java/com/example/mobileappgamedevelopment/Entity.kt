@@ -6,6 +6,7 @@ import android.opengl.GLES20
 import android.opengl.GLUtils
 import android.opengl.Matrix
 import android.view.WindowManager
+import java.util.Collections
 
 class Entity(
     var position: FloatArray = floatArrayOf(0f, 0f, 0f), // x, y, z
@@ -85,7 +86,7 @@ class Entity(
 
 class EntityManager(private val context: Context) {
     private var background : Entity? = null
-    private val entities = mutableListOf<Entity>()
+    private val entities = Collections.synchronizedList(mutableListOf<Entity>())
     private val textures = mutableMapOf<Int, Int>()
     private val textureLoadQueue = mutableListOf<Pair<Int, Entity>>()
     private var selectedEntity: Entity? = null
@@ -136,18 +137,27 @@ class EntityManager(private val context: Context) {
     }
 
     fun createEntity(resourceId: Int): Entity {
-        val textureId = textures.getOrPut(resourceId) {
-            loadTexture(context, resourceId)
-        }
+        val entity = Entity(textureId = -1)
+        textureLoadQueue.add(Pair(resourceId, entity))
+        entities.add(entity)
+        return entity
+    }
 
-        return Entity(textureId = textureId).also {
-            entities.add(it)
+    fun processTextureLoadQueue() {
+        for ((resourceId, entity) in textureLoadQueue) {
+            val textureId = textures.getOrPut(resourceId) {
+                loadTexture(context, resourceId)
+            }
+            entity.textureId = textureId // Assign the loaded texture ID to the entity
         }
+        textureLoadQueue.clear() // Clear the queue after processing
     }
 
     fun drawEntities(shader: OpenGLShader, mvpMatrix: FloatArray) {
-        for (entity in entities) {
-            entity.draw(shader, mvpMatrix)
+        synchronized(entities) {
+            for (entity in entities) {
+                entity.draw(shader, mvpMatrix)
+            }
         }
     }
 

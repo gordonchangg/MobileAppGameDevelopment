@@ -26,8 +26,7 @@ import com.google.firebase.auth.FirebaseAuth
 fun RegisterScreen(
     navigationHelper: NavigationHelper
 ) {
-    // State variables for input fields
-    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -41,18 +40,16 @@ fun RegisterScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Username Input Field
         TextField(
-            value = username,
-            onValueChange = { username = it },
-            label = { Text("Username") },
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Password Input Field
         TextField(
             value = password,
             onValueChange = { password = it },
@@ -64,7 +61,6 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Confirm Password Input Field
         TextField(
             value = confirmPassword,
             onValueChange = { confirmPassword = it },
@@ -76,7 +72,6 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Error Message (if any)
         if (errorMessage.isNotEmpty()) {
             Text(
                 text = errorMessage,
@@ -91,20 +86,17 @@ fun RegisterScreen(
         // Register Button
         Button(
             onClick = {
-                if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
                     errorMessage = "All fields are required"
                 } else if (password != confirmPassword) {
                     errorMessage = "Passwords do not match"
                 } else {
-                    errorMessage = "" // Clear error message
-                    // Create a new user with Firebase Authentication
-                    auth.createUserWithEmailAndPassword(username, password)
+                    errorMessage = ""
+                    auth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-                                // Registration successful, navigate to Main screen
-                                navigationHelper.navigateToMain(username)
+                                navigationHelper.navigateToMain(email)
                             } else {
-                                // Handle errors (e.g., invalid email, weak password)
                                 errorMessage = task.exception?.localizedMessage ?: "Registration failed"
                             }
                         }
