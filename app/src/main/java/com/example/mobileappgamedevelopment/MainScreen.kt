@@ -1,5 +1,7 @@
 package com.example.mobileappgamedevelopment
 
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,25 +11,37 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import java.io.File
 
 @Composable
-fun MainScreen(Username: String) {
+fun MainScreen(navigationHelper: NavigationHelper, Username: String) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center // Center the content vertically and horizontally
+        contentAlignment = Alignment.BottomCenter // Center the content vertically and horizontally
     ) {
+
         OpengGLComposable(
             modifier = Modifier.
             fillMaxSize()
         )
+        Button(
+            onClick = {
+                navigationHelper.navigateToCamera()
+            }
+        ) {
+            Text("Take Picture")
+        }
+
 //        Column(
 //            horizontalAlignment = Alignment.CenterHorizontally,
 //            verticalArrangement = Arrangement.Center

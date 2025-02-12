@@ -110,4 +110,38 @@ dependencies {
     implementation(libs.androidx.room.paging)
 
     //3rd party dependencies
+    val camerax_version = "1.5.0-alpha05"
+    // The following line is optional, as the core library is included indirectly by camera-camera2
+    implementation("androidx.camera:camera-core:${camerax_version}")
+    implementation("androidx.camera:camera-camera2:${camerax_version}")
+    // If you want to additionally use the CameraX Lifecycle library
+    implementation("androidx.camera:camera-lifecycle:${camerax_version}")
+    // If you want to additionally use the CameraX VideoCapture library
+    implementation("androidx.camera:camera-video:${camerax_version}")
+    // If you want to additionally use the CameraX View class
+    implementation("androidx.camera:camera-view:${camerax_version}")
+    // If you want to additionally add CameraX ML Kit Vision Integration
+    implementation("androidx.camera:camera-mlkit-vision:${camerax_version}")
+    // If you want to additionally use the CameraX Extensions library
+    implementation("androidx.camera:camera-extensions:${camerax_version}")
+
+    val activity_version = "1.9.3"
+
+    // Java language implementation
+    implementation("androidx.activity:activity:$activity_version")
+    // Kotlin
+    implementation("androidx.activity:activity-ktx:$activity_version")
+
+    val fragment_version = "1.8.5"
+
+    // Java language implementation
+    implementation("androidx.fragment:fragment:$fragment_version")
+    // Kotlin
+    implementation("androidx.fragment:fragment-ktx:$fragment_version")
+    // Compose
+    implementation("androidx.fragment:fragment-compose:$fragment_version")
+    // Testing Fragments in Isolation
+    debugImplementation("androidx.fragment:fragment-testing:$fragment_version")
+
+    implementation("com.google.accompanist:accompanist-permissions:0.33.1-alpha")
 }

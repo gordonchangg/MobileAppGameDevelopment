@@ -57,8 +57,19 @@ class MainActivity : ComponentActivity() {
                             Screen.Main.routePattern,
                             arguments = Screen.Main.arguments
                         ) { backStackEntry ->
+                            val navigationHelper = remember { NavigationHelper(navController) }
                             val username = backStackEntry.arguments?.getString("username") ?: ""
-                            MainScreen(Username = username)
+                            MainScreen(navigationHelper = navigationHelper, Username = username)
+                        }
+                        composable(Screen.Camera.route) {
+                            val navigationHelper = remember { NavigationHelper(navController) }
+                            CameraScreen(
+                                navigationHelper = navigationHelper,
+                                onImageCaptured = { capturedFile ->
+                                    // Handle the captured image file
+                                    println("Image captured: ${capturedFile.absolutePath}")
+                                }
+                            )
                         }
                     }
                 }
