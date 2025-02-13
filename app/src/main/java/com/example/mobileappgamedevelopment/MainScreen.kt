@@ -22,7 +22,7 @@ import androidx.core.content.ContextCompat
 import java.io.File
 
 @Composable
-fun MainScreen(navigationHelper: NavigationHelper, Username: String) {
+fun MainScreen(navigationHelper: NavigationHelper, Username: String, viewModel: MainViewModel) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -32,7 +32,8 @@ fun MainScreen(navigationHelper: NavigationHelper, Username: String) {
 
         OpengGLComposable(
             modifier = Modifier.
-            fillMaxSize()
+            fillMaxSize(),
+            viewModel
         )
         Button(
             onClick = {

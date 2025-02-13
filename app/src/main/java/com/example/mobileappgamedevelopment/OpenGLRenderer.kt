@@ -9,10 +9,9 @@ import android.os.SystemClock
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-class OpenGLRenderer(private val context: Context) : GLSurfaceView.Renderer {
+class OpenGLRenderer(private val context: Context, val viewModel: MainViewModel) : GLSurfaceView.Renderer {
 
     private lateinit var shader: OpenGLShader
-    lateinit var entityManager: EntityManager
     private val vPMatrix = FloatArray(16)
     private val projectionMatrix = FloatArray(16)
     private val viewMatrix = FloatArray(16)
@@ -48,9 +47,7 @@ class OpenGLRenderer(private val context: Context) : GLSurfaceView.Renderer {
         """.trimIndent()
 
         shader = OpenGLShader(vertexShaderCode, fragmentShaderCode)
-        entityManager = EntityManager()
-
-        entityManager.createBackgroundEntity(R.drawable.placeholder_bg)
+        viewModel.entityManager.createBackgroundEntity(R.drawable.placeholder_bg)
     }
 
     override fun onDrawFrame(unused: GL10) {
@@ -60,8 +57,8 @@ class OpenGLRenderer(private val context: Context) : GLSurfaceView.Renderer {
 
         Matrix.multiplyMM(vPMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
 
-        drawEntity(entityManager.background!!, shader, vPMatrix)
-        for(entity in entityManager.entities){
+        drawEntity(viewModel.entityManager.background!!, shader, vPMatrix)
+        for(entity in viewModel.entityManager.entities){
             drawEntity(entity, shader, vPMatrix)
         }
     }

@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 
-class OpenGLView(context: Context) : GLSurfaceView(context) {
+class OpenGLView(context: Context, viewModel: MainViewModel) : GLSurfaceView(context) {
     private val renderer : OpenGLRenderer
 
     private var previousX: Float = 0f
@@ -23,11 +23,11 @@ class OpenGLView(context: Context) : GLSurfaceView(context) {
                 val normalizedX = (x / width) * 2 - 1
                 val normalizedY = 1 - (y / height) * 2
 
-                val selectedEntity = renderer.entityManager.selectEntity(normalizedX, normalizedY)
+                val selectedEntity = renderer.viewModel.entityManager.selectEntity(normalizedX, normalizedY)
                 if(selectedEntity != null)
-                    renderer.entityManager.setSelectedEntity(selectedEntity)
+                    renderer.viewModel.entityManager.setSelectedEntity(selectedEntity)
                 else {
-                    var entity = renderer.entityManager.createEntity(R.drawable.placeholder_customer)
+                    var entity = renderer.viewModel.entityManager.createEntity(R.drawable.placeholder_customer)
                     entity.position = floatArrayOf(normalizedX, normalizedY, 0f)
                     entity.scale = floatArrayOf(0.5f, 0.5f, 1f)
                 }
@@ -40,13 +40,13 @@ class OpenGLView(context: Context) : GLSurfaceView(context) {
                 val normalizedDx = (dx / width) * 2
                 val normalizedDy = -(dy / height) * 2
 
-                renderer.entityManager.moveSelectedEntity(normalizedDx, normalizedDy)
+                renderer.viewModel.entityManager.moveSelectedEntity(normalizedDx, normalizedDy)
 
                 requestRender()
             }
 
             MotionEvent.ACTION_UP -> {
-                renderer.entityManager.setSelectedEntity(null)
+                renderer.viewModel.entityManager.setSelectedEntity(null)
             }
         }
 
@@ -58,16 +58,16 @@ class OpenGLView(context: Context) : GLSurfaceView(context) {
     init {
         setEGLContextClientVersion(2)
 
-        renderer = OpenGLRenderer(context)
+        renderer = OpenGLRenderer(context, viewModel)
         setRenderer(renderer)
     }
 }
 
 @Composable
-fun OpengGLComposable(modifier: Modifier = Modifier){
+fun OpengGLComposable(modifier: Modifier = Modifier, viewModel: MainViewModel){
     AndroidView(
         factory = { context ->
-            OpenGLView(context)
+            OpenGLView(context, viewModel)
         },
         modifier = modifier
     )

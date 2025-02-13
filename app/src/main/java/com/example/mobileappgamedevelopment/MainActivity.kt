@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -32,9 +33,10 @@ class MainActivity : ComponentActivity() {
         if (firebaseApps.isEmpty()) {
             FirebaseApp.initializeApp(this)
         }
+        val viewModelFactory = MainViewModelFactory()
         setContent {
             val navController = rememberNavController()
-
+            val viewModel: MainViewModel = viewModel(factory = viewModelFactory)
             MobileAppGameDevelopmentTheme {
                 Surface(
                     modifier =Modifier.fillMaxSize(),
@@ -59,7 +61,7 @@ class MainActivity : ComponentActivity() {
                         ) { backStackEntry ->
                             val navigationHelper = remember { NavigationHelper(navController) }
                             val username = backStackEntry.arguments?.getString("username") ?: ""
-                            MainScreen(navigationHelper = navigationHelper, Username = username)
+                            MainScreen(navigationHelper = navigationHelper, Username = username, viewModel)
                         }
                         composable(Screen.Camera.route) {
                             val navigationHelper = remember { NavigationHelper(navController) }
