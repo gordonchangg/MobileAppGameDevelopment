@@ -58,8 +58,11 @@ class OpenGLRenderer(private val context: Context, val viewModel: MainViewModel)
         Matrix.multiplyMM(vPMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
 
         drawEntity(viewModel.entityManager.background!!, shader, vPMatrix)
-        for(entity in viewModel.entityManager.entities){
-            drawEntity(entity, shader, vPMatrix)
+        synchronized(viewModel.entityManager.entities)
+        {
+            for (entity in viewModel.entityManager.entities) {
+                drawEntity(entity, shader, vPMatrix)
+            }
         }
     }
 

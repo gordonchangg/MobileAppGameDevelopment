@@ -17,11 +17,12 @@ class OpenGLView(context: Context, viewModel: MainViewModel) : GLSurfaceView(con
         val x: Float = e.x
         val y: Float = e.y
 
+        val aspectRatio = width.toFloat() / height
+        val normalizedX = ((x / width) * 2 - 1) * aspectRatio
+        val normalizedY = 1 - (y / height) * 2
+
         when (e.action) {
             MotionEvent.ACTION_DOWN -> {
-
-                val normalizedX = (x / width) * 2 - 1
-                val normalizedY = 1 - (y / height) * 2
 
                 val selectedEntity = renderer.viewModel.entityManager.selectEntity(normalizedX, normalizedY)
                 if(selectedEntity != null)
@@ -37,7 +38,7 @@ class OpenGLView(context: Context, viewModel: MainViewModel) : GLSurfaceView(con
                 val dx = x - previousX
                 val dy = y - previousY
 
-                val normalizedDx = (dx / width) * 2
+                val normalizedDx = (dx / width) * 2 * aspectRatio
                 val normalizedDy = -(dy / height) * 2
 
                 renderer.viewModel.entityManager.moveSelectedEntity(normalizedDx, normalizedDy)
