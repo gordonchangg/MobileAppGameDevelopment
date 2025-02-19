@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
 class MainViewModel() : ViewModel() {
-    var sceneManager = SceneManager()
     var entityManager = EntityManager()
+    var sceneManager = SceneManager(entityManager)
 }
 
 class MainViewModelFactory() : ViewModelProvider.Factory{

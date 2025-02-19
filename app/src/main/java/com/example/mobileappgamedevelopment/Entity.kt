@@ -6,7 +6,9 @@ class Entity(
     var position: FloatArray = floatArrayOf(0f, 0f, 0f), // x, y, z
     var scale: FloatArray = floatArrayOf(1f, 1f, 1f),     // scaleX, scaleY, scaleZ
     var rotation: Float = 0f,                             // Rotation angle in degrees
-    var textureId: Int                                   // Texture ID
+    var textureId: Int,                                   // Texture ID
+
+    val userData: MutableMap<String, Any?> = mutableMapOf()
 ) {
     fun contains(x: Float, y: Float): Boolean {
         val halfWidth = scale[0] / 2

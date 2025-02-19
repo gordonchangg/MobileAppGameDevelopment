@@ -9,7 +9,7 @@ import android.os.SystemClock
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-class OpenGLRenderer(private val context: Context, val viewModel: MainViewModel) : GLSurfaceView.Renderer {
+class OpenGLRenderer(private val context: Context, private val viewModel: MainViewModel) : GLSurfaceView.Renderer {
 
     private lateinit var shader: OpenGLShader
     private val vPMatrix = FloatArray(16)
@@ -48,6 +48,8 @@ class OpenGLRenderer(private val context: Context, val viewModel: MainViewModel)
 
         shader = OpenGLShader(vertexShaderCode, fragmentShaderCode)
         viewModel.entityManager.createBackgroundEntity(R.drawable.placeholder_bg)
+
+        viewModel.sceneManager.setScene(ShopScene::class)
     }
 
     override fun onDrawFrame(unused: GL10) {
@@ -58,11 +60,12 @@ class OpenGLRenderer(private val context: Context, val viewModel: MainViewModel)
         Matrix.multiplyMM(vPMatrix, 0, projectionMatrix, 0, viewMatrix, 0)
 
         drawEntity(viewModel.entityManager.background!!, shader, vPMatrix)
-        synchronized(viewModel.entityManager.entities)
-        {
-            for (entity in viewModel.entityManager.entities) {
-                drawEntity(entity, shader, vPMatrix)
-            }
+
+        viewModel.sceneManager.update()
+
+        val entities = viewModel.sceneManager.getEntities() // Thread-safe copy of entities
+        for (entity in entities) {
+            drawEntity(entity, shader, vPMatrix)
         }
     }
 
@@ -72,6 +75,8 @@ class OpenGLRenderer(private val context: Context, val viewModel: MainViewModel)
         val ratio: Float = width.toFloat() / height.toFloat()
 
         Matrix.frustumM(projectionMatrix, 0, -ratio, ratio, -1f, 1f, 3f, 7f)
+
+        viewModel.sceneManager.onSurfaceChanged()
     }
 
     private fun drawEntity(entity : Entity, shader : OpenGLShader, mvpMatrix: FloatArray){
