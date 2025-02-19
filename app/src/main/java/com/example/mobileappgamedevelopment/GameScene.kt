@@ -13,12 +13,21 @@ class GameScene : IScene {
     val gridHeight = 10
     val gridMinX = -0.4f
     val gridMaxX = 0.4f
-    val gridMinY = 0.5f
-    val gridMaxY = -0.8f
+    val gridMinY = 0.4f
+    val gridMaxY = -0.6f
     val cellWidth = (gridMaxX - gridMinX) / gridWidth
     val cellHeight = (gridMaxY - gridMinY) / gridHeight
     val gridThickness = 0.01f
-    val gridColor = floatArrayOf(0.1f, 0.1f, 0.1f, 1f)
+    val gridColor = floatArrayOf(0.737f, 0.478f, 0.349f, 1f)
+
+    val lightColor = floatArrayOf(0.95f, 0.85f, 0.60f, 1f) // Light beige
+    val darkColor = floatArrayOf(0.80f, 0.60f, 0.40f, 1f) // Darker beige
+
+    val cellColors = Array(gridWidth) { x ->
+        Array(gridHeight) { y ->
+            if ((x + y) % 2 == 0) lightColor else darkColor
+        }
+    }
 
     private var draggingEntity: Entity? = null
     private var isDragging = false
@@ -45,6 +54,28 @@ class GameScene : IScene {
     )
 
     override fun onSurfaceCreated() {
+        val lightColor = floatArrayOf(0.863f, 0.733f, 0.537f, 1f) // Extracted light beige
+        val darkColor = floatArrayOf(0.835f, 0.702f, 0.510f, 1f)
+
+        for (x in 0 until gridWidth) {
+            for (y in 0 until gridHeight) {
+                val color = if ((x + y) % 2 == 0) lightColor else darkColor
+
+                // Calculate the center position of the square
+                val centerX = gridMinX + x * cellWidth + cellWidth / 2
+                val centerY = gridMinY + y * cellHeight + cellHeight / 2
+
+                // Use thick lines to fill the cell
+                val thicknessX = cellWidth * 0.95f // Almost full width
+                val thicknessY = cellHeight * 0.95f // Almost full height
+
+                // Create filled rectangles using horizontal and vertical thick lines
+                lines.add(LineInfo(floatArrayOf(centerX - cellWidth / 2, centerY, 0f), floatArrayOf(centerX + cellWidth / 2, centerY, 0f), thicknessY, color))
+                lines.add(LineInfo(floatArrayOf(centerX, centerY - cellHeight / 2, 0f), floatArrayOf(centerX, centerY + cellHeight / 2, 0f), thicknessX, color))
+            }
+        }
+
+        // Draw grid lines on top
         for (i in 0..gridHeight) {
             val y = gridMinY + i * cellHeight
             val start = floatArrayOf(gridMinX, y, 0f)
@@ -59,10 +90,13 @@ class GameScene : IScene {
             lines.add(LineInfo(start, end, gridThickness, gridColor))
         }
 
+        // Add game entities
         addEntityToCell(2, 3, producer_book)
         addEntityToCell(5, 5, producer_seed)
         addEntityToCell(3, 7, producer_wheatplant)
     }
+
+
 
     override fun onSurfaceChanged() {}
 

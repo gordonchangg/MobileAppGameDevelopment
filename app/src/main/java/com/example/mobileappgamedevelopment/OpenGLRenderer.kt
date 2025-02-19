@@ -73,7 +73,7 @@ class OpenGLRenderer(private val context: Context, private val viewModel: MainVi
 
         lineShader = OpenGLShader(lineVertexShaderCode, lineFragmentShaderCode)
 
-        viewModel.entityManager.createBackgroundEntity(R.drawable.placeholder_bg)
+        viewModel.entityManager.createBackgroundEntity(R.drawable.gamescreenbg)
 
         viewModel.sceneManager.setScene(ShopScene::class)
     }
@@ -89,14 +89,14 @@ class OpenGLRenderer(private val context: Context, private val viewModel: MainVi
 
         viewModel.sceneManager.update()
 
-        val entities = viewModel.sceneManager.getEntities()
-        for (entity in entities) {
-            drawEntity(entity, shader, vPMatrix)
-        }
-
         val lines = viewModel.sceneManager.getLines()
         for(line in lines) {
             drawLine(lineShader, vPMatrix, line.start, line.end, line.thickness, line.color)
+        }
+
+        val entities = viewModel.sceneManager.getEntities()
+        for (entity in entities) {
+            drawEntity(entity, shader, vPMatrix)
         }
     }
 
