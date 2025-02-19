@@ -24,7 +24,6 @@ class GameScene : IScene {
     private var isDragging = false
     private var isHolding = false
     private val holdHandler = Handler(Looper.getMainLooper())
-    private var originalPosition: FloatArray = floatArrayOf(0f, 0f, 0f)
 
     private val holdRunnable = Runnable {
         if (draggingEntity != null) {
@@ -77,7 +76,6 @@ class GameScene : IScene {
                     isDragging = false
                     isHolding = false
 
-                    originalPosition = entity.position.copyOf()
                     // Start hold detection (300ms to start dragging)
                     holdHandler.postDelayed(holdRunnable, 300)
                     return
@@ -106,26 +104,18 @@ class GameScene : IScene {
 
         if (draggingEntity != null) {
             if (!isHolding) {
-                // ✅ If the user **tapped**, it's a Producer → Spawn ingredient
                 val ingredientTexture = producerToIngredient[draggingEntity!!.textureId]
                 if (ingredientTexture != null) {
                     val (xIndex, yIndex) = findNextAvailableGridCellNearProducer(draggingEntity!!)
                     if (xIndex != -1 && yIndex != -1) {
-                        addEntityToCell(xIndex, yIndex, ingredientTexture)
+                        addEntityToCell(xIndex, yIndex, ingredientTexture) // Spawn ingredient
                     }
                 }
             } else {
-                // ✅ If the user **held and dragged**, check if grid is occupied
                 val gridX = ((draggingEntity!!.position[0] - gridMinX) / cellWidth).toInt().coerceIn(0, gridWidth - 1)
                 val gridY = ((draggingEntity!!.position[1] - gridMinY) / cellHeight).toInt().coerceIn(0, gridHeight - 1)
 
-                if (isCellOccupied(gridX, gridY)) {
-                    // If occupied, return to original position
-                    draggingEntity!!.position = originalPosition
-                } else {
-                    // If free, snap to grid
-                    draggingEntity!!.position = getCellCenter(gridX, gridY, gridMinX, gridMinY, cellWidth, cellHeight)
-                }
+                draggingEntity!!.position = getCellCenter(gridX, gridY, gridMinX, gridMinY, cellWidth, cellHeight)
             }
         }
 
