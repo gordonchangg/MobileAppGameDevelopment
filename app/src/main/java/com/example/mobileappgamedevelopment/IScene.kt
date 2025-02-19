@@ -6,6 +6,8 @@ interface IScene {
     val entities: MutableList<Entity>
     var entityManager: EntityManager
     var sceneManager: SceneManager?
+
+    val lines: MutableList<LineInfo>
     fun onSurfaceCreated()
     fun onSurfaceChanged()
     fun update()
@@ -58,6 +60,13 @@ class SceneManager(private val entityManager: EntityManager){
         val entities = currentScene?.entities ?: emptyList<Entity>()
         return synchronized(entities) {
             ArrayList(entities) // Return a copy of the list
+        }
+    }
+
+    fun getLines(): List<LineInfo>{
+        val lines = currentScene?.lines ?: emptyList<LineInfo>()
+        return synchronized(lines) {
+            ArrayList(lines) // Return a copy of the list
         }
     }
 

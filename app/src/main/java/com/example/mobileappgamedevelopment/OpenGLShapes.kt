@@ -223,3 +223,10 @@ object QuadBuffers {
             position(0)
         }
 }
+
+data class LineInfo(
+    val start: FloatArray, // Start point (x, y, z)
+    val end: FloatArray,   // End point (x, y, z)
+    val thickness: Float,  // Line thickness
+    val color: FloatArray  // Line color (RGBA)
+)

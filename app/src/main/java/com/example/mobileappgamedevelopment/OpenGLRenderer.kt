@@ -6,12 +6,16 @@ import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.Matrix
 import android.os.SystemClock
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+import kotlin.math.sqrt
 
 class OpenGLRenderer(private val context: Context, private val viewModel: MainViewModel) : GLSurfaceView.Renderer {
 
     private lateinit var shader: OpenGLShader
+    private lateinit var lineShader: OpenGLShader
     private val vPMatrix = FloatArray(16)
     private val projectionMatrix = FloatArray(16)
     private val viewMatrix = FloatArray(16)
@@ -47,6 +51,28 @@ class OpenGLRenderer(private val context: Context, private val viewModel: MainVi
         """.trimIndent()
 
         shader = OpenGLShader(vertexShaderCode, fragmentShaderCode)
+
+        val lineVertexShaderCode = """
+            attribute vec4 vPosition; // Vertex position
+            uniform mat4 uMVPMatrix;  // Model-View-Projection matrix
+            
+            void main() {
+                gl_Position = uMVPMatrix * vPosition;
+            }
+        """.trimIndent()
+
+        // Define the fragment shader code
+        val lineFragmentShaderCode = """
+            precision mediump float;
+            uniform vec4 uColor; // Line color
+            
+            void main() {
+                gl_FragColor = uColor;
+            }
+        """.trimIndent()
+
+        lineShader = OpenGLShader(lineVertexShaderCode, lineFragmentShaderCode)
+
         viewModel.entityManager.createBackgroundEntity(R.drawable.placeholder_bg)
 
         viewModel.sceneManager.setScene(ShopScene::class)
@@ -63,9 +89,14 @@ class OpenGLRenderer(private val context: Context, private val viewModel: MainVi
 
         viewModel.sceneManager.update()
 
-        val entities = viewModel.sceneManager.getEntities() // Thread-safe copy of entities
+        val entities = viewModel.sceneManager.getEntities()
         for (entity in entities) {
             drawEntity(entity, shader, vPMatrix)
+        }
+
+        val lines = viewModel.sceneManager.getLines()
+        for(line in lines) {
+            drawLine(lineShader, vPMatrix, line.start, line.end, line.thickness, line.color)
         }
     }
 
@@ -138,5 +169,57 @@ class OpenGLRenderer(private val context: Context, private val viewModel: MainVi
 
         GLES20.glDisableVertexAttribArray(positionHandle)
         GLES20.glDisableVertexAttribArray(textureCoordinateHandle)
+    }
+
+    private fun calculatePerpendicularVector(start: FloatArray, end: FloatArray): FloatArray {
+        val dx = end[0] - start[0]
+        val dy = end[1] - start[1]
+        val length = sqrt(dx * dx + dy * dy)
+        return floatArrayOf(-dy / length, dx / length, 0f) // Perpendicular vector
+    }
+
+    fun drawLine(shader: OpenGLShader, mvpMatrix: FloatArray, start: FloatArray, end: FloatArray, thickness: Float, color: FloatArray) {
+        // Calculate the perpendicular vector
+        val perpendicular = calculatePerpendicularVector(start, end)
+
+        // Scale the perpendicular vector by half the thickness
+        val offsetX = perpendicular[0] * thickness / 2
+        val offsetY = perpendicular[1] * thickness / 2
+
+        // Generate the four vertices of the quad
+        val vertices = floatArrayOf(
+            start[0] - offsetX, start[1] - offsetY, start[2], // Bottom-left
+            start[0] + offsetX, start[1] + offsetY, start[2], // Top-left
+            end[0] - offsetX, end[1] - offsetY, end[2],       // Bottom-right
+            end[0] + offsetX, end[1] + offsetY, end[2]        // Top-right
+        )
+
+        // Generate a vertex buffer
+        val vertexBuffer = ByteBuffer.allocateDirect(vertices.size * 4)
+            .order(ByteOrder.nativeOrder())
+            .asFloatBuffer()
+        vertexBuffer.put(vertices).position(0)
+
+        // Use the shader program
+        shader.use()
+
+        // Get attribute and uniform locations
+        val positionHandle = GLES20.glGetAttribLocation(shader.programId, "vPosition")
+        val mvpMatrixHandle = GLES20.glGetUniformLocation(shader.programId, "uMVPMatrix")
+        val colorHandle = GLES20.glGetUniformLocation(shader.programId, "uColor")
+
+        // Pass the MVP matrix and color to the shader
+        GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false, mvpMatrix, 0)
+        GLES20.glUniform4fv(colorHandle, 1, color, 0)
+
+        // Enable the vertex attribute array
+        GLES20.glEnableVertexAttribArray(positionHandle)
+        GLES20.glVertexAttribPointer(positionHandle, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer)
+
+        // Draw the quad using GL_TRIANGLE_STRIP
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4)
+
+        // Disable the vertex attribute array
+        GLES20.glDisableVertexAttribArray(positionHandle)
     }
 }

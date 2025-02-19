@@ -4,12 +4,13 @@ class ShopScene : IScene {
     override val entities: MutableList<Entity> = mutableListOf()
     override lateinit var entityManager: EntityManager
     override var sceneManager: SceneManager? = null
+    override val lines: MutableList<LineInfo> = mutableListOf()
 
     private val path = listOf(
-        floatArrayOf(-0.4f, 0.8f, 0f),  // Top-left corner
-        floatArrayOf(0.4f, 0.8f, 0f),  // Top-right corner
-        floatArrayOf(0.4f, -0.8f, 0f), // Bottom-right corner
-        floatArrayOf(-0.4f, -0.8f, 0f) // Bottom-left corner
+        floatArrayOf(-0.4f, 0.8f, 0f),
+        floatArrayOf(0.4f, 0.8f, 0f),
+        floatArrayOf(0.4f, -0.8f, 0f),
+        floatArrayOf(-0.4f, -0.8f, 0f)
     )
 
     lateinit var toGameSceneButton: Entity
@@ -17,11 +18,11 @@ class ShopScene : IScene {
     override fun onSurfaceCreated() {
         repeat(5) { index ->
             val entity = entityManager.createEntity(R.drawable.placeholder_customer)
-            entity.position = floatArrayOf(-0.8f, 0.8f, 0f) // Start at the first waypoint
-            entity.scale = floatArrayOf(0.3f, 0.3f, 1f) // Smaller size for customers
-            entity.userData["path"] = path // Attach the path to the entity
-            entity.userData["progress"] = 0f // Track progress along the path
-            entity.userData["speed"] = 0.5f // Random speed between 0.5 and 1.0
+            entity.position = floatArrayOf(-0.8f, 0.8f, 0f)
+            entity.scale = floatArrayOf(0.3f, 0.3f, 1f)
+            entity.userData["path"] = path
+            entity.userData["progress"] = 0f
+            entity.userData["speed"] = 0.5f
             entities.add(entity)
         }
 
@@ -46,7 +47,7 @@ class ShopScene : IScene {
     override fun update() {
         synchronized(entities) {
             for (entity in entities) {
-                if (entity == toGameSceneButton) continue // Skip the button
+                if (entity == toGameSceneButton) continue
 
                 val path = entity.userData["path"] as List<FloatArray>
                 var progress = entity.userData["progress"] as Float
