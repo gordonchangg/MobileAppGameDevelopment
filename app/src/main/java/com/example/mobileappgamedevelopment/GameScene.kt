@@ -20,18 +20,19 @@ class GameScene : IScene {
     val gridThickness = 0.01f
     val gridColor = floatArrayOf(0.1f, 0.1f, 0.1f, 1f)
 
-    private var draggingEntity: Entity? = null  // Entity being moved
-    private var isDragging = false  // Tracks if dragging is happening
-    private var isHolding = false  // Tracks if user held long enough
-    private val holdHandler = Handler(Looper.getMainLooper())  // Timer for hold detection
+    private var draggingEntity: Entity? = null
+    private var isDragging = false
+    private var isHolding = false
+    private val holdHandler = Handler(Looper.getMainLooper())
 
     private val holdRunnable = Runnable {
         if (draggingEntity != null) {
             isHolding = true
-            isDragging = true  // Enable dragging
+            isDragging = true  // Enable dragging mode
         }
     }
-    //producers
+
+    // Producers
     val producer_seed = R.drawable.seedpack
     val producer_wheatplant = R.drawable.wheatplant
     val producer_book = R.drawable.book
@@ -58,37 +59,39 @@ class GameScene : IScene {
             lines.add(LineInfo(start, end, gridThickness, gridColor))
         }
 
-        //addEntityToCell(3, 5, R.drawable.placeholder_customer)
         addEntityToCell(2, 3, producer_book)
         addEntityToCell(5, 5, producer_seed)
         addEntityToCell(3, 7, producer_wheatplant)
-
     }
 
-    override fun onSurfaceChanged() {
+    override fun onSurfaceChanged() {}
 
-    }
+    override fun update() {}
 
-    override fun update() {
-
-    }
-
+    /**
+     * ✅ When clicking:
+     * - If it's a **Producer**, prepare to spawn an **Ingredient**.
+     * - If held for **300ms**, enable **dragging mode**.
+     */
     override fun onActionDown(normalizedX: Float, normalizedY: Float) {
         synchronized(entities) {
-            for (entity in entities.reversed()) { // Check topmost entity first
+            for (entity in entities.reversed()) {
                 if (entity.contains(normalizedX, normalizedY)) {
                     draggingEntity = entity
                     isDragging = false
                     isHolding = false
 
-                    // Start hold detection
-                    holdHandler.postDelayed(holdRunnable, 300) // 300ms delay for hold detection
+                    // Start hold detection (300ms to start dragging)
+                    holdHandler.postDelayed(holdRunnable, 300)
                     return
                 }
             }
         }
     }
 
+    /**
+     * ✅ Moves the entity if the user is **holding and dragging**.
+     */
     override fun onActionMove(normalizedDx: Float, normalizedDy: Float) {
         if (isDragging && draggingEntity != null) {
             draggingEntity!!.position[0] += normalizedDx
@@ -96,9 +99,59 @@ class GameScene : IScene {
         }
     }
 
+    /**
+     * ✅ When the user releases:
+     * - **If tapped** → Spawns an ingredient near the producer.
+     * - **If dragged** → Snaps the entity to the grid.
+     */
+    override fun onActionUp() {
+        holdHandler.removeCallbacks(holdRunnable) // Stop hold detection
 
+        if (draggingEntity != null) {
+            if (!isHolding) {
+                // ✅ If the user **tapped**, it's a Producer → Spawn ingredient
+                val ingredientTexture = producerToIngredient[draggingEntity!!.textureId]
+                if (ingredientTexture != null) {
+                    val (xIndex, yIndex) = findNextAvailableGridCellNearProducer(draggingEntity!!)
+                    if (xIndex != -1 && yIndex != -1) {
+                        addEntityToCell(xIndex, yIndex, ingredientTexture) // Spawn ingredient
+                    }
+                }
+            } else {
+                // ✅ If the user **held and dragged**, snap to the grid
+                val gridX = ((draggingEntity!!.position[0] - gridMinX) / cellWidth).toInt().coerceIn(0, gridWidth - 1)
+                val gridY = ((draggingEntity!!.position[1] - gridMinY) / cellHeight).toInt().coerceIn(0, gridHeight - 1)
 
+                draggingEntity!!.position = getCellCenter(gridX, gridY, gridMinX, gridMinY, cellWidth, cellHeight)
+            }
+        }
 
+        // Reset states
+        draggingEntity = null
+        isDragging = false
+        isHolding = false
+    }
+
+    /**
+     * ✅ Calculates the **center position** of a grid cell.
+     */
+    fun getCellCenter(xIndex: Int, yIndex: Int, gridMinX: Float, gridMinY: Float, cellWidth: Float, cellHeight: Float): FloatArray {
+        val centerX = gridMinX + (xIndex + 0.5f) * cellWidth
+        val centerY = gridMinY + (yIndex + 0.5f) * cellHeight
+        return floatArrayOf(centerX, centerY, 0f) // Z-coordinate is 0
+    }
+
+    fun addEntityToCell(xIndex: Int, yIndex: Int, textureId: Int) {
+        val cellCenter = getCellCenter(xIndex, yIndex, gridMinX, gridMinY, cellWidth, cellHeight)
+        val entity = entityManager.createEntity(textureId)
+        entity.position = cellCenter
+        entity.scale = floatArrayOf(0.05f, 0.05f, 1f)
+        entities.add(entity)
+    }
+
+    /**
+     * ✅ Finds the next available grid position near the producer.
+     */
     fun findNextAvailableGridCellNearProducer(producer: Entity): Pair<Int, Int> {
         val producerX = ((producer.position[0] - gridMinX) / cellWidth).toInt()
         val producerY = ((producer.position[1] - gridMinY) / cellHeight).toInt()
@@ -109,60 +162,18 @@ class GameScene : IScene {
             xIndex to yIndex
         }.toSet()
 
-        val searchOrder = mutableListOf<Pair<Int, Int>>()
+        val searchOrder = listOf(
+            Pair(-1, 0), Pair(1, 0), Pair(0, -1), Pair(0, 1), // Adjacent cells
+            Pair(-1, -1), Pair(-1, 1), Pair(1, -1), Pair(1, 1) // Diagonal cells
+        )
 
-        // First, check direct adjacent spaces
-        searchOrder.addAll(listOf(
-            Pair(producerX - 1, producerY), // Left
-            Pair(producerX + 1, producerY), // Right
-            Pair(producerX, producerY - 1), // Up
-            Pair(producerX, producerY + 1)  // Down
-        ))
-
-        // Then, expand outward in a circular pattern
-        for (radius in 1..Math.max(gridWidth, gridHeight)) {
-            for (dx in -radius..radius) {
-                for (dy in -radius..radius) {
-                    if (dx == 0 && dy == 0) continue // Skip producer's own cell
-                    searchOrder.add(Pair(producerX + dx, producerY + dy))
-                }
+        for ((dx, dy) in searchOrder) {
+            val newX = producerX + dx
+            val newY = producerY + dy
+            if (newX in 0 until gridWidth && newY in 0 until gridHeight && !occupiedCells.contains(newX to newY)) {
+                return newX to newY
             }
         }
-
-        // Find the first available spot from searchOrder
-        for ((x, y) in searchOrder) {
-            if (x in 0 until gridWidth && y in 0 until gridHeight && !occupiedCells.contains(x to y)) {
-                return x to y
-            }
-        }
-
-        return -1 to -1 // No available space
-    }
-
-    override fun onActionUp() {
-        draggingEntity?.let { entity ->
-            val gridX = ((entity.position[0] - gridMinX) / cellWidth).toInt().coerceIn(0, gridWidth - 1)
-            val gridY = ((entity.position[1] - gridMinY) / cellHeight).toInt().coerceIn(0, gridHeight - 1)
-
-            val snappedPosition = getCellCenter(gridX, gridY, gridMinX, gridMinY, cellWidth, cellHeight)
-            entity.position = snappedPosition
-        }
-        draggingEntity = null
-    }
-
-    fun getCellCenter(xIndex: Int, yIndex: Int, gridMinX: Float, gridMinY: Float, cellWidth: Float, cellHeight: Float): FloatArray {
-        val centerX = gridMinX + (xIndex + 0.5f) * cellWidth
-        val centerY = gridMinY + (yIndex + 0.5f) * cellHeight
-        return floatArrayOf(centerX, centerY, 0f) // Z-coordinate is 0
-    }
-
-    fun addEntityToCell(xIndex: Int, yIndex: Int, textureId: Int) {
-        val cellCenter = getCellCenter(xIndex, yIndex, gridMinX, gridMinY, cellWidth, cellHeight)
-
-        //original pikachu
-        val entity = entityManager.createEntity(textureId)
-        entity.position = cellCenter
-        entity.scale = floatArrayOf(0.05f, 0.05f, 1f)
-        entities.add(entity)
+        return -1 to -1 // No available space nearby
     }
 }
