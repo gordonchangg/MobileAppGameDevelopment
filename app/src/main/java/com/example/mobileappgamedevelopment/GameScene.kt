@@ -1,5 +1,8 @@
 package com.example.mobileappgamedevelopment
 
+import android.os.Handler
+import android.os.Looper
+
 class GameScene : IScene {
     override val entities: MutableList<Entity> = mutableListOf()
     override lateinit var entityManager: EntityManager
@@ -17,8 +20,17 @@ class GameScene : IScene {
     val gridThickness = 0.01f
     val gridColor = floatArrayOf(0.1f, 0.1f, 0.1f, 1f)
 
-    private var draggingEntity: Entity? = null
+    private var draggingEntity: Entity? = null  // Entity being moved
+    private var isDragging = false  // Tracks if dragging is happening
+    private var isHolding = false  // Tracks if user held long enough
+    private val holdHandler = Handler(Looper.getMainLooper())  // Timer for hold detection
 
+    private val holdRunnable = Runnable {
+        if (draggingEntity != null) {
+            isHolding = true
+            isDragging = true  // Enable dragging
+        }
+    }
     //producers
     val producer_seed = R.drawable.seedpack
     val producer_wheatplant = R.drawable.wheatplant
@@ -65,14 +77,12 @@ class GameScene : IScene {
         synchronized(entities) {
             for (entity in entities.reversed()) { // Check topmost entity first
                 if (entity.contains(normalizedX, normalizedY)) {
-                    // Check if the clicked entity is a producer
-                    val ingredientTexture = producerToIngredient[entity.textureId]
-                    if (ingredientTexture != null) {
-                        val (xIndex, yIndex) = findNextAvailableGridCellNearProducer(entity)
-                        if (xIndex != -1 && yIndex != -1) {
-                            addEntityToCell(xIndex, yIndex, ingredientTexture) // Spawn ingredient
-                        }
-                    }
+                    draggingEntity = entity
+                    isDragging = false
+                    isHolding = false
+
+                    // Start hold detection
+                    holdHandler.postDelayed(holdRunnable, 300) // 300ms delay for hold detection
                     return
                 }
             }
@@ -80,11 +90,15 @@ class GameScene : IScene {
     }
 
     override fun onActionMove(normalizedDx: Float, normalizedDy: Float) {
-        draggingEntity?.let {
-            it.position[0] += normalizedDx
-            it.position[1] += normalizedDy
+        if (isDragging && draggingEntity != null) {
+            draggingEntity!!.position[0] += normalizedDx
+            draggingEntity!!.position[1] += normalizedDy
         }
     }
+
+
+
+
     fun findNextAvailableGridCellNearProducer(producer: Entity): Pair<Int, Int> {
         val producerX = ((producer.position[0] - gridMinX) / cellWidth).toInt()
         val producerY = ((producer.position[1] - gridMinY) / cellHeight).toInt()
