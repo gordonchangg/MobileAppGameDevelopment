@@ -24,6 +24,7 @@ class GameScene : IScene {
     private var isDragging = false
     private var isHolding = false
     private val holdHandler = Handler(Looper.getMainLooper())
+    private var originalPosition: FloatArray = floatArrayOf(0f, 0f, 0f)
 
     private val holdRunnable = Runnable {
         if (draggingEntity != null) {
@@ -68,11 +69,6 @@ class GameScene : IScene {
 
     override fun update() {}
 
-    /**
-     * ✅ When clicking:
-     * - If it's a **Producer**, prepare to spawn an **Ingredient**.
-     * - If held for **300ms**, enable **dragging mode**.
-     */
     override fun onActionDown(normalizedX: Float, normalizedY: Float) {
         synchronized(entities) {
             for (entity in entities.reversed()) {
@@ -81,6 +77,7 @@ class GameScene : IScene {
                     isDragging = false
                     isHolding = false
 
+                    originalPosition = entity.position.copyOf()
                     // Start hold detection (300ms to start dragging)
                     holdHandler.postDelayed(holdRunnable, 300)
                     return
@@ -88,10 +85,14 @@ class GameScene : IScene {
             }
         }
     }
+    fun isCellOccupied(xIndex: Int, yIndex: Int): Boolean {
+        return entities.any { entity ->
+            val entityX = ((entity.position[0] - gridMinX) / cellWidth).toInt()
+            val entityY = ((entity.position[1] - gridMinY) / cellHeight).toInt()
+            entityX == xIndex && entityY == yIndex
+        }
+    }
 
-    /**
-     * ✅ Moves the entity if the user is **holding and dragging**.
-     */
     override fun onActionMove(normalizedDx: Float, normalizedDy: Float) {
         if (isDragging && draggingEntity != null) {
             draggingEntity!!.position[0] += normalizedDx
@@ -99,11 +100,7 @@ class GameScene : IScene {
         }
     }
 
-    /**
-     * ✅ When the user releases:
-     * - **If tapped** → Spawns an ingredient near the producer.
-     * - **If dragged** → Snaps the entity to the grid.
-     */
+
     override fun onActionUp() {
         holdHandler.removeCallbacks(holdRunnable) // Stop hold detection
 
@@ -114,15 +111,21 @@ class GameScene : IScene {
                 if (ingredientTexture != null) {
                     val (xIndex, yIndex) = findNextAvailableGridCellNearProducer(draggingEntity!!)
                     if (xIndex != -1 && yIndex != -1) {
-                        addEntityToCell(xIndex, yIndex, ingredientTexture) // Spawn ingredient
+                        addEntityToCell(xIndex, yIndex, ingredientTexture)
                     }
                 }
             } else {
-                // ✅ If the user **held and dragged**, snap to the grid
+                // ✅ If the user **held and dragged**, check if grid is occupied
                 val gridX = ((draggingEntity!!.position[0] - gridMinX) / cellWidth).toInt().coerceIn(0, gridWidth - 1)
                 val gridY = ((draggingEntity!!.position[1] - gridMinY) / cellHeight).toInt().coerceIn(0, gridHeight - 1)
 
-                draggingEntity!!.position = getCellCenter(gridX, gridY, gridMinX, gridMinY, cellWidth, cellHeight)
+                if (isCellOccupied(gridX, gridY)) {
+                    // If occupied, return to original position
+                    draggingEntity!!.position = originalPosition
+                } else {
+                    // If free, snap to grid
+                    draggingEntity!!.position = getCellCenter(gridX, gridY, gridMinX, gridMinY, cellWidth, cellHeight)
+                }
             }
         }
 
@@ -132,9 +135,7 @@ class GameScene : IScene {
         isHolding = false
     }
 
-    /**
-     * ✅ Calculates the **center position** of a grid cell.
-     */
+
     fun getCellCenter(xIndex: Int, yIndex: Int, gridMinX: Float, gridMinY: Float, cellWidth: Float, cellHeight: Float): FloatArray {
         val centerX = gridMinX + (xIndex + 0.5f) * cellWidth
         val centerY = gridMinY + (yIndex + 0.5f) * cellHeight
@@ -142,16 +143,15 @@ class GameScene : IScene {
     }
 
     fun addEntityToCell(xIndex: Int, yIndex: Int, textureId: Int) {
-        val cellCenter = getCellCenter(xIndex, yIndex, gridMinX, gridMinY, cellWidth, cellHeight)
-        val entity = entityManager.createEntity(textureId)
-        entity.position = cellCenter
-        entity.scale = floatArrayOf(0.05f, 0.05f, 1f)
-        entities.add(entity)
+        if (!isCellOccupied(xIndex, yIndex)) {
+            val cellCenter = getCellCenter(xIndex, yIndex, gridMinX, gridMinY, cellWidth, cellHeight)
+            val entity = entityManager.createEntity(textureId)
+            entity.position = cellCenter
+            entity.scale = floatArrayOf(0.05f, 0.05f, 1f)
+            entities.add(entity)
+        }
     }
 
-    /**
-     * ✅ Finds the next available grid position near the producer.
-     */
     fun findNextAvailableGridCellNearProducer(producer: Entity): Pair<Int, Int> {
         val producerX = ((producer.position[0] - gridMinX) / cellWidth).toInt()
         val producerY = ((producer.position[1] - gridMinY) / cellHeight).toInt()
