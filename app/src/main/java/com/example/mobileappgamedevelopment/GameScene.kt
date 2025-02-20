@@ -2,12 +2,14 @@ package com.example.mobileappgamedevelopment
 
 import android.os.Handler
 import android.os.Looper
+import androidx.lifecycle.ViewModel
 
 class GameScene : IScene {
     override val entities: MutableList<Entity> = mutableListOf()
     override lateinit var entityManager: EntityManager
     override var sceneManager: SceneManager? = null
     override val lines: MutableList<LineInfo> = mutableListOf()
+    override lateinit var viewModel: MainViewModel
 
     val gridWidth = 8
     val gridHeight = 10
@@ -198,6 +200,6 @@ class GameScene : IScene {
                 return newX to newY
             }
         }
-        return -1 to -1 // No available space nearby
+        return -1 to -1
     }
 }

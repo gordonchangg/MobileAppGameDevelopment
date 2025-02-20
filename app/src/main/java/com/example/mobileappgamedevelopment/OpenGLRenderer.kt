@@ -75,7 +75,7 @@ class OpenGLRenderer(private val context: Context, private val viewModel: MainVi
 
         viewModel.entityManager.createBackgroundEntity(R.drawable.gamescreenbg)
 
-        viewModel.sceneManager.setScene(ShopScene::class)
+        viewModel.sceneManager.setScene(ShopScene::class, viewModel)
     }
 
     override fun onDrawFrame(unused: GL10) {

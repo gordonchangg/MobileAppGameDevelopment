@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.database.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -109,6 +110,8 @@ dependencies {
     implementation(libs.androidx.paging.compose)
     implementation(libs.androidx.room.paging)
 
+    implementation ("com.google.guava:guava:31.0.1-android")
+
     //3rd party dependencies
     val camerax_version = "1.5.0-alpha05"
     // The following line is optional, as the core library is included indirectly by camera-camera2
@@ -144,4 +147,8 @@ dependencies {
     debugImplementation("androidx.fragment:fragment-testing:$fragment_version")
 
     implementation("com.google.accompanist:accompanist-permissions:0.33.1-alpha")
+
+    implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
+
+    implementation("com.google.firebase:firebase-firestore")
 }

@@ -16,6 +16,7 @@ sealed class Screen(val route: String) {
         }
     }
     object Camera : Screen("Camera")
+    object Ranking : Screen("Ranking")
 }
 
 class NavigationHelper(private val navController: NavController) {
@@ -33,5 +34,9 @@ class NavigationHelper(private val navController: NavController) {
 
     fun navigateToCamera(){
         navController.navigate(Screen.Camera.route)
+    }
+
+    fun navigateToRanking(){
+        navController.navigate(Screen.Ranking.route)
     }
 }

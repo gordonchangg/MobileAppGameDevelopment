@@ -11,13 +11,25 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import java.io.File
 
@@ -29,45 +41,54 @@ fun MainScreen(navigationHelper: NavigationHelper, Username: String, viewModel: 
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.BottomCenter // Center the content vertically and horizontally
     ) {
+        val userId = "user1"
+        val email = Username
+        var coins = 100
+        LaunchedEffect(email) {
+            viewModel.getUser(
+                email,
+                onSuccess = { userData ->
+                    if (userData != null) {
+                        coins = (userData["coins"] as? Int) ?: 100 // Update coins if data exists
+                    } else {
+                        viewModel.addUser(userId, email, coins) // Add user if not found
+                    }
+                },
+                onFailure = { exception ->
+                    println("Error retrieving user: ${exception.message}")
+                }
+            )
+        }
 
         OpengGLComposable(
             modifier = Modifier.
             fillMaxSize(),
             viewModel
         )
-        Button(
-            onClick = {
-                navigationHelper.navigateToCamera()
-            }
-        ) {
-            Text("Take Picture")
-        }
 
-//        Column(
-//            horizontalAlignment = Alignment.CenterHorizontally,
-//            verticalArrangement = Arrangement.Center
-//        ) {
-//            // Greeting Text
-//            Text(
-//                text = "Welcome, $Username!",
-//                style = MaterialTheme.typography.headlineMedium,
-//                color = MaterialTheme.colorScheme.primary
-//            )
-//
-//            Spacer(modifier = Modifier.height(16.dp))
-//
-//            // Additional Content (Optional)
-//            Text(
-//                text = "You are now logged in.",
-//                style = MaterialTheme.typography.bodyLarge,
-//                color = MaterialTheme.colorScheme.onBackground
-//            )
-//
-//            OpengGLComposable(
-//                modifier = Modifier.
-//                fillMaxWidth().
-//                height(300.dp)
-//            )
-//        }
+        Column(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp) // Add spacing between buttons
+        ) {
+            Button(
+                onClick = {
+                    navigationHelper.navigateToRanking()
+                },
+                modifier = Modifier.fillMaxWidth() // Make the button fill the width
+            ) {
+                Text("To Ranking Screen")
+            }
+
+            Button(
+                onClick = {
+                    navigationHelper.navigateToCamera()
+                },
+                modifier = Modifier.fillMaxWidth() // Make the button fill the width
+            ) {
+                Text("Take Picture")
+            }
+        }
     }
 }

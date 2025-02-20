@@ -1,10 +1,22 @@
 package com.example.mobileappgamedevelopment
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
+import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
 class ShopScene : IScene {
     override val entities: MutableList<Entity> = mutableListOf()
     override lateinit var entityManager: EntityManager
     override var sceneManager: SceneManager? = null
     override val lines: MutableList<LineInfo> = mutableListOf()
+    override lateinit var viewModel: MainViewModel
+
 
     private val path = listOf(
         floatArrayOf(-0.4f, 0.8f, 0f),
@@ -30,6 +42,10 @@ class ShopScene : IScene {
         toGameSceneButton.position = floatArrayOf(0f, -0.8f, 0f)
         toGameSceneButton.scale = floatArrayOf(0.5f, 0.5f, 0.5f)
         entities.add(toGameSceneButton)
+
+//        CoroutineScope(Dispatchers.Main).launch {
+//            viewModel.updateDynamicText("New Dynamic Text!", true, Offset(0f, 0f))
+//        }
     }
 
     override fun onSurfaceChanged() {
@@ -74,7 +90,7 @@ class ShopScene : IScene {
     override fun onActionDown(normalizedX: Float, normalizedY: Float) {
         synchronized(entities) {
             if(toGameSceneButton.contains(normalizedX, normalizedY)){
-                sceneManager?.setScene(GameScene::class)
+                sceneManager?.setScene(GameScene::class, viewModel)
             }
         }
     }

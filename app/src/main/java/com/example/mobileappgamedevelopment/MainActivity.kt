@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -35,43 +36,53 @@ class MainActivity : ComponentActivity() {
         }
         val viewModelFactory = MainViewModelFactory()
         setContent {
-            val navController = rememberNavController()
-            val viewModel: MainViewModel = viewModel(factory = viewModelFactory)
             MobileAppGameDevelopmentTheme {
                 Surface(
                     modifier =Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NavHost(navController = navController, startDestination = Screen.Main("").route) {
-                        composable(Screen.Login.route) {
-                            val navigationHelper = remember { NavigationHelper(navController) }
-                            LoginScreen(
-                                navigationHelper = navigationHelper
-                            )
-                        }
-                        composable(Screen.Register.route) {
-                            val navigationHelper = remember { NavigationHelper(navController) }
-                            RegisterScreen(
-                                navigationHelper = navigationHelper
-                            )
-                        }
-                        composable(
-                            Screen.Main.routePattern,
-                            arguments = Screen.Main.arguments
-                        ) { backStackEntry ->
-                            val navigationHelper = remember { NavigationHelper(navController) }
-                            val username = backStackEntry.arguments?.getString("username") ?: ""
-                            MainScreen(navigationHelper = navigationHelper, Username = username, viewModel)
-                        }
-                        composable(Screen.Camera.route) {
-                            val navigationHelper = remember { NavigationHelper(navController) }
-                            CameraScreen(
-                                navigationHelper = navigationHelper,
-                                onImageCaptured = { capturedFile ->
-                                    // Handle the captured image file
-                                    println("Image captured: ${capturedFile.absolutePath}")
-                                }
-                            )
+                    val navController = rememberNavController()
+                    val viewModel: MainViewModel = viewModel(factory = viewModelFactory)
+
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        // Navigation host
+                        NavHost(navController = navController, startDestination = Screen.Main("h@gmail.com").route) {
+                            composable(Screen.Login.route) {
+                                val navigationHelper = remember { NavigationHelper(navController) }
+                                LoginScreen(navigationHelper = navigationHelper)
+                            }
+                            composable(Screen.Register.route) {
+                                val navigationHelper = remember { NavigationHelper(navController) }
+                                RegisterScreen(navigationHelper = navigationHelper)
+                            }
+                            composable(
+                                Screen.Main.routePattern,
+                                arguments = Screen.Main.arguments
+                            ) { backStackEntry ->
+                                val navigationHelper = remember { NavigationHelper(navController) }
+                                val username = backStackEntry.arguments?.getString("username") ?: ""
+                                MainScreen(
+                                    navigationHelper = navigationHelper,
+                                    Username = username,
+                                    viewModel = viewModel
+                                )
+                            }
+                            composable(Screen.Camera.route) {
+                                val navigationHelper = remember { NavigationHelper(navController) }
+                                CameraScreen(
+                                    navigationHelper = navigationHelper,
+                                    onImageCaptured = { capturedFile ->
+                                        println("Image captured: ${capturedFile.absolutePath}")
+                                    }
+                                )
+                            }
+                            composable(Screen.Ranking.route){
+                                val navigationHelper = remember { NavigationHelper(navController) }
+                                RankingScreen(
+                                    navigationHelper = navigationHelper,
+                                    viewModel
+                                )
+                            }
                         }
                     }
                 }

@@ -6,6 +6,7 @@ interface IScene {
     val entities: MutableList<Entity>
     var entityManager: EntityManager
     var sceneManager: SceneManager?
+    var viewModel: MainViewModel
 
     val lines: MutableList<LineInfo>
     fun onSurfaceCreated()
@@ -21,7 +22,7 @@ class SceneManager(private val entityManager: EntityManager){
     private var currentScene: IScene? = null
     private val sceneCache = mutableMapOf<KClass<*>, IScene>()
 
-    fun setScene(sceneClass: KClass<out IScene>) {
+    fun setScene(sceneClass: KClass<out IScene>, viewModel: MainViewModel) {
         val (scene, isNewScene) = if (sceneClass in sceneCache) {
             sceneCache[sceneClass]!! to false
         } else {
@@ -39,6 +40,7 @@ class SceneManager(private val entityManager: EntityManager){
         }
 
         currentScene = scene
+        currentScene?.viewModel = viewModel
         currentScene?.entityManager = entityManager
         currentScene?.sceneManager = this
 
