@@ -110,7 +110,7 @@ dependencies {
     implementation(libs.androidx.paging.compose)
     implementation(libs.androidx.room.paging)
 
-    implementation ("com.google.guava:guava:31.0.1-android")
+    implementation ("com.google.guava:guava:33.4.0-android")
 
     //3rd party dependencies
     val camerax_version = "1.5.0-alpha05"
@@ -128,14 +128,14 @@ dependencies {
     // If you want to additionally use the CameraX Extensions library
     implementation("androidx.camera:camera-extensions:${camerax_version}")
 
-    val activity_version = "1.9.3"
+    val activity_version = "1.10.0"
 
     // Java language implementation
     implementation("androidx.activity:activity:$activity_version")
     // Kotlin
     implementation("androidx.activity:activity-ktx:$activity_version")
 
-    val fragment_version = "1.8.5"
+    val fragment_version = "1.8.6"
 
     // Java language implementation
     implementation("androidx.fragment:fragment:$fragment_version")
@@ -146,7 +146,7 @@ dependencies {
     // Testing Fragments in Isolation
     debugImplementation("androidx.fragment:fragment-testing:$fragment_version")
 
-    implementation("com.google.accompanist:accompanist-permissions:0.33.1-alpha")
+    implementation("com.google.accompanist:accompanist-permissions:0.37.1")
 
     implementation(platform("com.google.firebase:firebase-bom:33.9.0"))
 
