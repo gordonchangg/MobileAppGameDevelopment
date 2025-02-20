@@ -25,6 +25,8 @@ class GameScene : IScene {
     val lightColor = floatArrayOf(0.95f, 0.85f, 0.60f, 1f) // Light beige
     val darkColor = floatArrayOf(0.80f, 0.60f, 0.40f, 1f) // Darker beige
 
+    var ori_pos = floatArrayOf(0.0f, 0.0f, 0.0f)
+
     val cellColors = Array(gridWidth) { x ->
         Array(gridHeight) { y ->
             if ((x + y) % 2 == 0) lightColor else darkColor
@@ -104,6 +106,18 @@ class GameScene : IScene {
 
     override fun update() {}
 
+    fun getEntityDrawableInCell(xIndex: Int, yIndex: Int): Int? {
+        for (entity in entities) {
+            val entityX = ((entity.position[0] - gridMinX) / cellWidth).toInt()
+            val entityY = ((entity.position[1] - gridMinY) / cellHeight).toInt()
+
+            if (entityX == xIndex && entityY == yIndex) {
+                return entity.textureId // Return the drawable ID of the entity
+            }
+        }
+        return null // Return null if no entity is found in the cell
+    }
+
     override fun onActionDown(normalizedX: Float, normalizedY: Float) {
         synchronized(entities) {
             for (entity in entities.reversed()) {
@@ -111,6 +125,7 @@ class GameScene : IScene {
                     draggingEntity = entity
                     isDragging = false
                     isHolding = false
+                    ori_pos = entity.position.copyOf()
 
                     // Start hold detection (300ms to start dragging)
                     holdHandler.postDelayed(holdRunnable, 300)
@@ -119,13 +134,20 @@ class GameScene : IScene {
             }
         }
     }
-    fun isCellOccupied(xIndex: Int, yIndex: Int): Boolean {
-        return entities.any { entity ->
-            val entityX = ((entity.position[0] - gridMinX) / cellWidth).toInt()
-            val entityY = ((entity.position[1] - gridMinY) / cellHeight).toInt()
-            entityX == xIndex && entityY == yIndex
-        }
+    fun isCellOccupied(xIndex: Int, yIndex: Int, excludeEntity: Entity? = null): Boolean {
+        val occupiedCells = entities.filter { it != excludeEntity } // Exclude dragging entity
+            .map { entity ->
+                val entityX = ((entity.position[0] - gridMinX) / cellWidth).toInt()
+                val entityY = ((entity.position[1] - gridMinY) / cellHeight).toInt()
+                entityX to entityY
+            }.toSet()
+
+        println("Occupied cells (excluding current entity): $occupiedCells") // DEBUG PRINT
+
+        return occupiedCells.contains(xIndex to yIndex)
     }
+
+
 
     override fun onActionMove(normalizedDx: Float, normalizedDy: Float) {
         if (isDragging && draggingEntity != null) {
@@ -133,25 +155,65 @@ class GameScene : IScene {
             draggingEntity!!.position[1] += normalizedDy
         }
     }
+    fun findNearestEmptyCell(startX: Int, startY: Int, excludeEntity: Entity? = null): Pair<Int, Int> {
+        val searchOffsets = listOf(
+            Pair(0, 1), Pair(0, -1), Pair(1, 0), Pair(-1, 0), // Adjacent cells
+            Pair(1, 1), Pair(1, -1), Pair(-1, 1), Pair(-1, -1) // Diagonal cells
+        )
+
+        for ((dx, dy) in searchOffsets) {
+            val newX = startX + dx
+            val newY = startY + dy
+
+            if (newX in 0 until gridWidth && newY in 0 until gridHeight && !isCellOccupied(newX, newY, excludeEntity)) {
+                return newX to newY // ✅ Found an empty spot
+            }
+        }
+
+        return -1 to -1 // 🚨 No empty space found
+    }
 
 
     override fun onActionUp() {
         holdHandler.removeCallbacks(holdRunnable) // Stop hold detection
 
         if (draggingEntity != null) {
+            // Convert entity position to grid indices BEFORE updating position
+            val previousX = ((ori_pos[0] - gridMinX) / cellWidth).toInt().coerceIn(0, gridWidth - 1)
+            val previousY = ((ori_pos[1] - gridMinY) / cellHeight).toInt().coerceIn(0, gridHeight - 1)
+
+            val gridX = ((draggingEntity!!.position[0] - gridMinX) / cellWidth).toInt().coerceIn(0, gridWidth - 1)
+            val gridY = ((draggingEntity!!.position[1] - gridMinY) / cellHeight).toInt().coerceIn(0, gridHeight - 1)
+
+            println("Trying to place entity at ($gridX, $gridY) - Occupied before update: ${isCellOccupied(gridX, gridY, excludeEntity = draggingEntity)}")
+
             if (!isHolding) {
+                // ✅ If the entity is a producer, try to spawn an ingredient
                 val ingredientTexture = producerToIngredient[draggingEntity!!.textureId]
                 if (ingredientTexture != null) {
                     val (xIndex, yIndex) = findNextAvailableGridCellNearProducer(draggingEntity!!)
                     if (xIndex != -1 && yIndex != -1) {
                         addEntityToCell(xIndex, yIndex, ingredientTexture) // Spawn ingredient
+                        println("Ingredient spawned at ($xIndex, $yIndex)")
                     }
                 }
             } else {
-                val gridX = ((draggingEntity!!.position[0] - gridMinX) / cellWidth).toInt().coerceIn(0, gridWidth - 1)
-                val gridY = ((draggingEntity!!.position[1] - gridMinY) / cellHeight).toInt().coerceIn(0, gridHeight - 1)
+                // ✅ If the entity is held, attempt to place it in the nearest valid cell
+                if (!isCellOccupied(gridX, gridY, excludeEntity = draggingEntity)) {
+                    draggingEntity!!.position = getCellCenter(gridX, gridY, gridMinX, gridMinY, cellWidth, cellHeight)
+                    println("Entity placed successfully at ($gridX, $gridY)")
+                } else {
+                    // 🔍 Search for the nearest available cell, excluding the dragging entity itself
+                    val (newX, newY) = findNearestEmptyCell(gridX, gridY, excludeEntity = draggingEntity)
 
-                draggingEntity!!.position = getCellCenter(gridX, gridY, gridMinX, gridMinY, cellWidth, cellHeight)
+                    if (newX != -1 && newY != -1) {
+                        draggingEntity!!.position = getCellCenter(newX, newY, gridMinX, gridMinY, cellWidth, cellHeight)
+                        println("Cell occupied! Moved entity to nearest empty cell ($newX, $newY)")
+                    } else {
+                        draggingEntity!!.position = ori_pos.copyOf()
+                        println("No empty cells nearby! Returning entity to original position ($previousX, $previousY).")
+                    }
+                }
             }
         }
 
@@ -160,6 +222,7 @@ class GameScene : IScene {
         isDragging = false
         isHolding = false
     }
+
 
 
     fun getCellCenter(xIndex: Int, yIndex: Int, gridMinX: Float, gridMinY: Float, cellWidth: Float, cellHeight: Float): FloatArray {
