@@ -56,6 +56,12 @@ class GameScene : IScene {
         producer_wheatplant to R.drawable.wheat,
         producer_book to R.drawable.paper
     )
+    private val mergeChains = mapOf(
+        R.drawable.seed to listOf(R.drawable.seed,R.drawable.plant, R.drawable.strawberry, R.drawable.chocolate, R.drawable.vanilla),
+        R.drawable.paper to listOf(R.drawable.paper,R.drawable.stackofpaper, R.drawable.plastic, R.drawable.wrapper, R.drawable.cup ),
+        R.drawable.wheat to listOf(R.drawable.wheat,R.drawable.stackfowheat, R.drawable.flour, R.drawable.sponge, R.drawable.cupcake)
+    )
+
 
     override fun onSurfaceCreated() {
         val lightColor = floatArrayOf(0.863f, 0.733f, 0.537f, 1f) // Extracted light beige
@@ -134,6 +140,14 @@ class GameScene : IScene {
             }
         }
     }
+
+    fun getEntityInCell(xIndex: Int, yIndex: Int): Entity? {
+        return entities.find { entity ->
+            val entityX = ((entity.position[0] - gridMinX) / cellWidth).toInt()
+            val entityY = ((entity.position[1] - gridMinY) / cellHeight).toInt()
+            entityX == xIndex && entityY == yIndex
+        }
+    }
     fun isCellOccupied(xIndex: Int, yIndex: Int, excludeEntity: Entity? = null): Boolean {
         val occupiedCells = entities.filter { it != excludeEntity } // Exclude dragging entity
             .map { entity ->
@@ -188,7 +202,6 @@ class GameScene : IScene {
             println("Trying to place entity at ($gridX, $gridY) - Occupied before update: ${isCellOccupied(gridX, gridY, excludeEntity = draggingEntity)}")
 
             if (!isHolding) {
-                // ✅ If the entity is a producer, try to spawn an ingredient
                 val ingredientTexture = producerToIngredient[draggingEntity!!.textureId]
                 if (ingredientTexture != null) {
                     val (xIndex, yIndex) = findNextAvailableGridCellNearProducer(draggingEntity!!)
@@ -198,20 +211,46 @@ class GameScene : IScene {
                     }
                 }
             } else {
-                // ✅ If the entity is held, attempt to place it in the nearest valid cell
                 if (!isCellOccupied(gridX, gridY, excludeEntity = draggingEntity)) {
-                    draggingEntity!!.position = getCellCenter(gridX, gridY, gridMinX, gridMinY, cellWidth, cellHeight)
-                    println("Entity placed successfully at ($gridX, $gridY)")
-                } else {
-                    // 🔍 Search for the nearest available cell, excluding the dragging entity itself
-                    val (newX, newY) = findNearestEmptyCell(gridX, gridY, excludeEntity = draggingEntity)
 
-                    if (newX != -1 && newY != -1) {
-                        draggingEntity!!.position = getCellCenter(newX, newY, gridMinX, gridMinY, cellWidth, cellHeight)
-                        println("Cell occupied! Moved entity to nearest empty cell ($newX, $newY)")
-                    } else {
-                        draggingEntity!!.position = ori_pos.copyOf()
-                        println("No empty cells nearby! Returning entity to original position ($previousX, $previousY).")
+
+                        draggingEntity!!.position = getCellCenter(gridX, gridY, gridMinX, gridMinY, cellWidth, cellHeight)
+                        println("Entity placed successfully at ($gridX, $gridY)")
+
+
+                } else {
+                    val existingEntity = getEntityInCell(gridX, gridY)
+                    val newTexture = getNextMergeTexture(draggingEntity!!.textureId)
+                    if(existingEntity!!.textureId == draggingEntity!!.textureId){
+                        println("same entity")
+                        newTexture?.let {
+                            // ✅ Only update if `newTexture` is NOT null
+                            existingEntity.textureId = it
+                            println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
+
+                            // ✅ Move the second entity off-screen
+                            draggingEntity!!.position = floatArrayOf(-1.5f, -1.5f, 0f)
+                            println("Dragged entity moved off-screen after merging.")
+                        } ?: println("No further upgrades available.")
+                    }
+                    else {
+
+
+                        // Search for the nearest available cell, excluding the dragging entity itself
+                        val (newX, newY) = findNearestEmptyCell(
+                            gridX,
+                            gridY,
+                            excludeEntity = draggingEntity
+                        )
+
+                        if (newX != -1 && newY != -1) {
+                            draggingEntity!!.position =
+                                getCellCenter(newX, newY, gridMinX, gridMinY, cellWidth, cellHeight)
+                            println("Cell occupied! Moved entity to nearest empty cell ($newX, $newY)")
+                        } else {
+                            draggingEntity!!.position = ori_pos.copyOf()
+                            println("No empty cells nearby! Returning entity to original position ($previousX, $previousY).")
+                        }
                     }
                 }
             }
@@ -222,6 +261,31 @@ class GameScene : IScene {
         isDragging = false
         isHolding = false
     }
+
+    fun getNextMergeTexture(currentTexture: Int): Int? {
+        val mergeList = mergeChains[currentTexture] ?: return null
+
+        println("🔍 Checking merge list: $mergeList for texture ID $currentTexture")
+
+        val currentIndex = mergeList.indexOf(currentTexture)
+
+        if (currentIndex == -1) {
+            println("🚨 ERROR: Texture ID $currentTexture not found in merge list: $mergeList")
+            return null
+        }
+
+        if (currentIndex < mergeList.size - 1) {
+            val nextTexture = mergeList[currentIndex + 1]
+            println("✅ Next upgrade found! $currentTexture → $nextTexture")
+            return nextTexture
+        }
+
+        println("🔴 No further upgrades available for texture ID $currentTexture")
+        return null
+    }
+
+
+
 
 
 
@@ -238,8 +302,11 @@ class GameScene : IScene {
             entity.position = cellCenter
             entity.scale = floatArrayOf(0.05f, 0.05f, 1f)
             entities.add(entity)
+
+            println("✅ Entity Created at ($xIndex, $yIndex) with Texture ID: $textureId")
         }
     }
+
 
     fun findNextAvailableGridCellNearProducer(producer: Entity): Pair<Int, Int> {
         val producerX = ((producer.position[0] - gridMinX) / cellWidth).toInt()
