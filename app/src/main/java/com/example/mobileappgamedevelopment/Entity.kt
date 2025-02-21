@@ -65,4 +65,10 @@ class EntityManager() {
         entities.add(entity)
         return entity
     }
+
+    fun deleteEntity(entity: Entity) {
+        synchronized(entities) {
+            entities.remove(entity)
+        }
+    }
 }

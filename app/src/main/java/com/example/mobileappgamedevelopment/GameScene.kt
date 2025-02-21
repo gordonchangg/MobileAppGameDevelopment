@@ -108,7 +108,9 @@ class GameScene : IScene {
 
     override fun onSurfaceChanged() {}
 
-    override fun update() {}
+    override fun update() {
+        entityManager.setBackgroundTexture(R.drawable.gamescreenbg)
+    }
 
     fun getEntityDrawableInCell(xIndex: Int, yIndex: Int): Int? {
         for (entity in entities) {

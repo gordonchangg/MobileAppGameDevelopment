@@ -10,6 +10,7 @@ import com.google.firebase.database.ValueEventListener
 class MainViewModel() : ViewModel() {
     var entityManager = EntityManager()
     var sceneManager = SceneManager(entityManager)
+    var audioManager = AudioManager()
 
     private val _dynamicText = MutableLiveData("")
     private val _showText = MutableLiveData(false)

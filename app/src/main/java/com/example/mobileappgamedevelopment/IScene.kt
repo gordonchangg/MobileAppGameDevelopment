@@ -16,6 +16,11 @@ interface IScene {
     fun onActionDown(normalizedX: Float, normalizedY: Float)
     fun onActionMove(normalizedDx: Float, normalizedDy: Float)
     fun onActionUp()
+
+    fun deleteEntity(entity: Entity){
+        entityManager.deleteEntity(entity)
+        entities.remove(entity)
+    }
 }
 
 class SceneManager(private val entityManager: EntityManager){

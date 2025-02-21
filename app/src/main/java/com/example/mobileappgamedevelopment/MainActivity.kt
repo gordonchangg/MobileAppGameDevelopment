@@ -44,6 +44,8 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     val viewModel: MainViewModel = viewModel(factory = viewModelFactory)
 
+                    viewModel.audioManager.setContext(this)
+
                     Box(modifier = Modifier.fillMaxSize()) {
                         // Navigation host
                         NavHost(navController = navController, startDestination = Screen.Main("h@gmail.com").route) {

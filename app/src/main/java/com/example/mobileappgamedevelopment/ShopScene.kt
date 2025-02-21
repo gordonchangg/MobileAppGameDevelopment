@@ -61,35 +61,39 @@ class ShopScene : IScene {
     }
 
     override fun update() {
-        synchronized(entities) {
-            for (entity in entities) {
-                if (entity == toGameSceneButton) continue
+//        synchronized(entities) {
+//            for (entity in entities) {
+//                if (entity == toGameSceneButton) continue
+//
+//                val path = entity.userData["path"] as? List<FloatArray> ?: emptyList()
+//                var progress = entity.userData["progress"] as Float
+//                val speed = entity.userData["speed"] as Float
+//
+//                progress += 0.0167f * speed
+//
+//                while (progress >= path.size) {
+//                    progress -= path.size.toFloat()
+//                }
+//
+//                val segmentIndex = progress.toInt()
+//                val t = progress - segmentIndex
+//                val start = path[segmentIndex % path.size]
+//                val end = path[(segmentIndex + 1) % path.size]
+//
+//                entity.position = interpolate(start, end, t)
+//
+//                entity.userData["progress"] = progress
+//            }
+//        }
 
-                val path = entity.userData["path"] as List<FloatArray>
-                var progress = entity.userData["progress"] as Float
-                val speed = entity.userData["speed"] as Float
-
-                progress += 0.0167f * speed
-
-                while (progress >= path.size) {
-                    progress -= path.size.toFloat()
-                }
-
-                val segmentIndex = progress.toInt()
-                val t = progress - segmentIndex
-                val start = path[segmentIndex % path.size]
-                val end = path[(segmentIndex + 1) % path.size]
-
-                entity.position = interpolate(start, end, t)
-
-                entity.userData["progress"] = progress
-            }
-        }
+        entityManager.setBackgroundTexture(R.drawable.placeholder_bg)
     }
 
     override fun onActionDown(normalizedX: Float, normalizedY: Float) {
+        viewModel.audioManager.playAudio(R.raw.click)
         synchronized(entities) {
             if(toGameSceneButton.contains(normalizedX, normalizedY)){
+
                 sceneManager?.setScene(GameScene::class, viewModel)
             }
         }
