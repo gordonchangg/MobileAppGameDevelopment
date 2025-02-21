@@ -20,6 +20,8 @@ class ShopScene : IScene {
     override lateinit var viewModel: MainViewModel
 
     lateinit var table: Entity
+    lateinit var table1: Entity
+    lateinit var table2: Entity
 
 
     private val path = listOf(
@@ -47,6 +49,28 @@ class ShopScene : IScene {
         toGameSceneButton.position = floatArrayOf(0.3f, -0.87f, 0f)
         toGameSceneButton.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
         entities.add(toGameSceneButton)
+
+        //tables
+        table  =entityManager.createEntity(R.drawable.table)
+        table.position = floatArrayOf(-0.16f, -0.1f, 0f)
+        table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
+        entities.add(table)
+
+        table  =entityManager.createEntity(R.drawable.table)
+        table.position = floatArrayOf(-0.16f, -0.5f, 0f)
+        table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
+        entities.add(table)
+
+        table  =entityManager.createEntity(R.drawable.table)
+        table.position = floatArrayOf(0.16f, -0.1f, 0f)
+        table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
+        entities.add(table)
+
+        table  =entityManager.createEntity(R.drawable.table)
+        table.position = floatArrayOf(0.16f, -0.5f, 0f)
+        table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
+        entities.add(table)
+
     }
 
     override fun onSurfaceChanged() {
