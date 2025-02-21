@@ -46,7 +46,7 @@ class ShopScene : IScene {
 //        CoroutineScope(Dispatchers.Main).launch {
 //            viewModel.updateDynamicText("New Dynamic Text!", true, Offset(0f, 0f))
 //        }
-        viewModel.audioManager.playBGM(R.raw.bgm)
+        //viewModel.audioManager.playBGM(R.raw.bgm)
     }
 
     override fun onSurfaceChanged() {

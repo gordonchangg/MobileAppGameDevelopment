@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -27,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,12 +69,45 @@ fun MainScreen(navigationHelper: NavigationHelper, Username: String, viewModel: 
             viewModel
         )
 
+        Column(modifier = Modifier
+            .align(Alignment.Center)
+            .padding(16.dp)) {
+            val coinInfo = TextInfo("100")
+            val textInfoList by viewModel.textInfoList.observeAsState(mutableListOf())
+
+
+            textInfoList.forEach { textInfo ->
+                val density = LocalDensity.current
+                val offsetX = with(density) { textInfo.offsetX }
+                val offsetY = with(density) { textInfo.offsetY }
+
+                Text(
+                    text = textInfo.text,
+                    fontSize = textInfo.fontSize,
+                    color = textInfo.color,
+                    modifier = Modifier
+                        .absoluteOffset(x = offsetX, y = offsetY)
+                        .padding(8.dp)
+                )
+            }
+
+//            Text(
+//                text = "100",
+//                fontSize = 24.sp,
+//                color = Color.Blue,
+//                modifier = Modifier
+//                    .absoluteOffset(x = 100.dp, y = -400.dp)
+//                    .padding(8.dp)
+//            )
+        }
+
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp) // Add spacing between buttons
         ) {
+
             Button(
                 onClick = {
                     navigationHelper.navigateToRanking()

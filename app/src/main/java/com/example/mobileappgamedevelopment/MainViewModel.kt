@@ -12,18 +12,19 @@ class MainViewModel() : ViewModel() {
     var sceneManager = SceneManager(entityManager)
     var audioManager = AudioManager()
 
-    private val _dynamicText = MutableLiveData("")
-    private val _showText = MutableLiveData(false)
-    private val _textPosition = MutableLiveData(Offset.Zero)
+    private val _textInfoList = MutableLiveData<MutableList<TextInfo>>(mutableListOf())
+    val textInfoList: LiveData<MutableList<TextInfo>> = _textInfoList
 
-    val dynamicText: LiveData<String> = _dynamicText
-    val showText: LiveData<Boolean> = _showText
-    val textPosition: LiveData<Offset> = _textPosition
+    fun addTextInfo(textInfo: TextInfo) {
+        val currentList = _textInfoList.value?.toMutableList() ?: mutableListOf()
+        currentList.add(textInfo)
+        _textInfoList.value = currentList
+    }
 
-    fun updateDynamicText(text: String, show: Boolean, position: Offset) {
-        _dynamicText.value = text
-        _showText.value = show
-        _textPosition.value = position
+    fun removeTextInfo(textInfo: TextInfo) {
+        val currentList = _textInfoList.value ?: mutableListOf()
+        currentList.remove(textInfo)
+        _textInfoList.value = currentList
     }
 
     private val database = Database()
@@ -47,6 +48,8 @@ class MainViewModel() : ViewModel() {
     fun getAllUsers(onSuccess: (List<Map<String, Any?>>) -> Unit, onFailure: (Exception) -> Unit) {
         database.getAllUsers(onSuccess, onFailure)
     }
+
+
 }
 
 class MainViewModelFactory() : ViewModelProvider.Factory{

@@ -2,7 +2,8 @@ package com.example.mobileappgamedevelopment
 
 import android.os.Handler
 import android.os.Looper
-import androidx.lifecycle.ViewModel
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.dp
 
 class GameScene : IScene {
     override val entities: MutableList<Entity> = mutableListOf()
@@ -10,6 +11,8 @@ class GameScene : IScene {
     override var sceneManager: SceneManager? = null
     override val lines: MutableList<LineInfo> = mutableListOf()
     override lateinit var viewModel: MainViewModel
+
+    lateinit var coinsText : TextInfo
 
     val gridWidth = 8
     val gridHeight = 10
@@ -104,6 +107,12 @@ class GameScene : IScene {
         addEntityToCell(2, 3, producer_book)
         addEntityToCell(5, 5, producer_seed)
         addEntityToCell(3, 7, producer_wheatplant)
+
+        coinsText = TextInfo("100")
+        coinsText.offsetX = 150.dp
+        coinsText.offsetY = (-230).dp
+
+        viewModel.addTextInfo(coinsText)
     }
 
     override fun onSurfaceChanged() {}
@@ -138,6 +147,10 @@ class GameScene : IScene {
                 }
             }
         }
+
+        viewModel.removeTextInfo(coinsText)
+        coinsText.text = "150"
+        viewModel.addTextInfo(coinsText)
     }
 
     fun getEntityInCell(xIndex: Int, yIndex: Int, excludeEntity: Entity? = null): Entity? {
