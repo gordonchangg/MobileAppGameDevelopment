@@ -148,6 +148,8 @@ class GameScene : IScene {
             }
         }
 
+        viewModel.updateUserCoins(150)
+
         viewModel.removeTextInfo(coinsText)
         coinsText.text = "150"
         viewModel.addTextInfo(coinsText)

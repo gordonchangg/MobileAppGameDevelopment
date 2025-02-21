@@ -12,6 +12,8 @@ class MainViewModel() : ViewModel() {
     var sceneManager = SceneManager(entityManager)
     var audioManager = AudioManager()
 
+    lateinit var currentUserId : String
+
     private val _textInfoList = MutableLiveData<MutableList<TextInfo>>(mutableListOf())
     val textInfoList: LiveData<MutableList<TextInfo>> = _textInfoList
 
@@ -37,12 +39,13 @@ class MainViewModel() : ViewModel() {
         database.deleteUser(userId)
     }
 
-    fun updateUserCoins(userId: String, coins: Int) {
-        database.updateUserCoins(userId, coins)
+    fun updateUserCoins(coins: Int) {
+        database.updateUserCoins(currentUserId, coins)
     }
 
     fun getUser(userId: String, onSuccess: (Map<String, Any?>?) -> Unit, onFailure: (Exception) -> Unit) {
         database.getUser(userId, onSuccess, onFailure)
+        currentUserId = userId
     }
 
     fun getAllUsers(onSuccess: (List<Map<String, Any?>>) -> Unit, onFailure: (Exception) -> Unit) {

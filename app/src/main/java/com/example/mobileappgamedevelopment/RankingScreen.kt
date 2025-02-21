@@ -32,35 +32,31 @@ fun RankingScreen(
     navigationHelper: NavigationHelper,
     viewModel: MainViewModel
 ) {
-    // State to hold the list of users
     var users by remember { mutableStateOf<List<Map<String, Any?>>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) } // Loading state
-    var errorMessage by remember { mutableStateOf<String?>(null) } // Error message
+    var isLoading by remember { mutableStateOf(true) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    // Fetch users when the screen is first composed
     LaunchedEffect(Unit) {
         viewModel.getAllUsers(
             onSuccess = { userList ->
-                users = userList // Update the user list
-                isLoading = false // Stop loading
+                users = userList
+                isLoading = false
             },
             onFailure = { exception ->
-                errorMessage = "Failed to load users: ${exception.message}" // Set error message
-                isLoading = false // Stop loading
+                errorMessage = "Failed to load users: ${exception.message}"
+                isLoading = false
             }
         )
     }
 
-    // Display loading indicator if data is being fetched
     if (isLoading) {
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator() // Show a loading spinner
+            CircularProgressIndicator()
         }
     } else if (errorMessage != null) {
-        // Display error message if fetching failed
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -72,7 +68,6 @@ fun RankingScreen(
             )
         }
     } else {
-        // Display the list of users
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -85,12 +80,11 @@ fun RankingScreen(
     }
 }
 
-// Composable for displaying a single user row
 @Composable
 fun UserRow(user: Map<String, Any?>) {
     val userId = user["id"] as? String ?: "Unknown ID"
     val email = user["email"] as? String ?: "Unknown Email"
-    val coins = user["coins"] as? Int ?: 0
+    val coins = user["coins"] as? Long ?: 0
 
     Row(
         modifier = Modifier
