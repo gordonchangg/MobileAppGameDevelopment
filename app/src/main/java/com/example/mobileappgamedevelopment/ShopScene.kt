@@ -19,12 +19,15 @@ class ShopScene : IScene {
     override val lines: MutableList<LineInfo> = mutableListOf()
     override lateinit var viewModel: MainViewModel
 
+    lateinit var table: Entity
+
 
     private val path = listOf(
-        floatArrayOf(-0.4f, 0.8f, 0f),
-        floatArrayOf(0.4f, 0.8f, 0f),
-        floatArrayOf(0.4f, -0.8f, 0f),
-        floatArrayOf(-0.4f, -0.8f, 0f)
+        floatArrayOf(0.3f, 0.45f, 0f),
+        floatArrayOf(0.3f, 0.25f, 0f),
+        floatArrayOf(-0.13f, 0.25f, 0f),
+//        floatArrayOf(0.4f, -0.8f, 0f),
+//        floatArrayOf(-0.4f, -0.8f, 0f)
     )
 
     lateinit var toGameSceneButton: Entity
@@ -33,7 +36,7 @@ class ShopScene : IScene {
         repeat(1) { index ->
             val entity = entityManager.createEntity(R.drawable.placeholder_customer)
             entity.position = floatArrayOf(-0.8f, 0.8f, 0f)
-            entity.scale = floatArrayOf(0.3f, 0.3f, 1f)
+            entity.scale = floatArrayOf(0.2f, 0.2f, 1f)
             entity.userData["path"] = path
             entity.userData["progress"] = 0f
             entity.userData["speed"] = 0.5f
@@ -92,7 +95,7 @@ class ShopScene : IScene {
 
         }
 
-        entityManager.setBackgroundTexture(R.drawable.placeholder_bg)
+        entityManager.setBackgroundTexture(R.drawable.shopbg)
     }
 
     override fun onActionDown(normalizedX: Float, normalizedY: Float) {
