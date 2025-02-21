@@ -6,8 +6,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.ViewModel
+import coil3.Bitmap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 class ShopScene : IScene {
@@ -42,11 +44,6 @@ class ShopScene : IScene {
         toGameSceneButton.position = floatArrayOf(0f, -0.8f, 0f)
         toGameSceneButton.scale = floatArrayOf(0.5f, 0.5f, 0.5f)
         entities.add(toGameSceneButton)
-
-//        CoroutineScope(Dispatchers.Main).launch {
-//            viewModel.updateDynamicText("New Dynamic Text!", true, Offset(0f, 0f))
-//        }
-        //viewModel.audioManager.playBGM(R.raw.bgm)
     }
 
     override fun onSurfaceChanged() {

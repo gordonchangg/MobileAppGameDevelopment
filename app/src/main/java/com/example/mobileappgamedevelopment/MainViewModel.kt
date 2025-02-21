@@ -1,11 +1,15 @@
 package com.example.mobileappgamedevelopment
 
+import android.content.Context
 import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import coil3.Bitmap
 import com.google.firebase.database.ValueEventListener
+import java.io.File
+import java.util.concurrent.ConcurrentLinkedQueue
 
 class MainViewModel() : ViewModel() {
     var entityManager = EntityManager()
@@ -52,7 +56,9 @@ class MainViewModel() : ViewModel() {
         database.getAllUsers(onSuccess, onFailure)
     }
 
-
+    fun uploadImageToFirebase(file: File, onUploadComplete: (String?) -> Unit){
+        database.uploadImageToFirebase(currentUserId, file, onUploadComplete)
+    }
 }
 
 class MainViewModelFactory() : ViewModelProvider.Factory{

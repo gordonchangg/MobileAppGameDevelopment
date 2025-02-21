@@ -1,16 +1,22 @@
 package com.example.mobileappgamedevelopment
 
+import android.content.Context
+import android.os.Environment
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.datastore.core.IOException
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -60,19 +67,14 @@ fun CameraScreen(
                     it.setSurfaceProvider(previewView?.surfaceProvider)
                 }
 
-                // Set up the image capture use case
                 imageCapture = ImageCapture.Builder().build()
 
-                // Select the back camera as default
                 val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
 
                 try {
-                    // Unbind all use cases before rebinding
                     cameraProvider.unbindAll()
-
-                    // Bind use cases to the camera
                     cameraProvider.bindToLifecycle(
-                        lifecycleOwner as LifecycleOwner,
+                        lifecycleOwner,
                         cameraSelector,
                         preview,
                         imageCapture
@@ -83,43 +85,54 @@ fun CameraScreen(
             }, ContextCompat.getMainExecutor(context))
         }
 
-        // Camera preview
-        AndroidView(
-            factory = { ctx ->
-                PreviewView(ctx).apply {
-                    previewView = this
-                }
-            },
-            modifier = modifier.fillMaxSize()
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.BottomCenter // Center the content vertically and horizontally
+        ){
+            AndroidView(
+                factory = { ctx ->
+                    PreviewView(ctx).apply {
+                        previewView = this
+                    }
+                },
+                modifier = modifier.fillMaxSize()
+            )
 
-//        // Capture button
-//        Button(
-//            onClick = {
-//                imageCapture?.let { capture ->
-//                    val photoFile = File.createTempFile("capture", ".jpg")
-//                    val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
-//
-//                    capture.takePicture(
-//                        outputOptions,
-//                        ContextCompat.getMainExecutor(context),
-//                        object : ImageCapture.OnImageSavedCallback {
-//                            override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-//                                onImageCaptured(photoFile)
-//                            }
-//
-//                            override fun onError(exception: ImageCaptureException) {
-//                                exception.printStackTrace()
-//                            }
-//                        }
-//                    )
-//                }
-//            }
-//        ) {
-//            Text("Take Picture")
-//        }
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp) // Add spacing between buttons
+            ){
+                Button(
+                    onClick = {
+                        imageCapture?.let { capture ->
+                            val photoFile = File.createTempFile("capture", ".jpg")
+                            val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+
+                            capture.takePicture(
+                                outputOptions,
+                                ContextCompat.getMainExecutor(context),
+                                object : ImageCapture.OnImageSavedCallback {
+                                    override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                                        onImageCaptured(photoFile)
+                                    }
+
+                                    override fun onError(exception: ImageCaptureException) {
+                                        exception.printStackTrace()
+                                    }
+                                }
+                            )
+                        }
+                    }
+                ) {
+                    Text("Take Picture")
+                }
+            }
+        }
     } else {
-        // Permission not granted, show a message and request permission
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -131,4 +144,10 @@ fun CameraScreen(
             }
         }
     }
+}
+
+@Throws(IOException::class)
+private fun createImageFile(context: Context): File {
+    val storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+    return File.createTempFile("JPEG_", ".jpg", storageDir)
 }

@@ -6,8 +6,10 @@ import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.Matrix
 import android.os.SystemClock
+import coil3.Bitmap
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.util.concurrent.ConcurrentLinkedQueue
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import kotlin.math.sqrt
@@ -222,4 +224,7 @@ class OpenGLRenderer(private val context: Context, private val viewModel: MainVi
         // Disable the vertex attribute array
         GLES20.glDisableVertexAttribArray(positionHandle)
     }
+
+
+
 }

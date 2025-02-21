@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.opengl.GLES20
 import android.opengl.GLUtils
+import coil3.Bitmap
+
 
 fun loadTexture(context: Context, resourceId: Int): Int {
     val textureHandle = IntArray(1)

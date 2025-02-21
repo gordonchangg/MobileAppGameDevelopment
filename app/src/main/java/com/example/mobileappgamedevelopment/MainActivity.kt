@@ -73,8 +73,15 @@ class MainActivity : ComponentActivity() {
                                 val navigationHelper = remember { NavigationHelper(navController) }
                                 CameraScreen(
                                     navigationHelper = navigationHelper,
-                                    onImageCaptured = { capturedFile ->
-                                        println("Image captured: ${capturedFile.absolutePath}")
+                                    onImageCaptured = { photoFile ->
+                                        viewModel.uploadImageToFirebase(photoFile) { downloadUrl ->
+                                            if (downloadUrl != null) {
+                                                println("Image uploaded successfully: $downloadUrl")
+                                                // Use the download URL as needed (e.g., save it to Firestore or display it)
+                                            } else {
+                                                println("Failed to upload image")
+                                            }
+                                        }
                                     }
                                 )
                             }
