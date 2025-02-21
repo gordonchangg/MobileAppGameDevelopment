@@ -40,9 +40,9 @@ class SceneManager(private val entityManager: EntityManager){
             newScene to true
         }
 
-        if (currentScene != null && currentScene != scene) {
-            currentScene?.onSurfaceCreated()
-        }
+//        if (currentScene != null && currentScene != scene) {
+//            currentScene?.onSurfaceCreated()
+//        }
 
         currentScene = scene
         currentScene?.viewModel = viewModel

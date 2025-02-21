@@ -148,29 +148,29 @@ class GameScene : IScene {
 
             sceneManager?.setScene(ShopScene::class, viewModel)
         }
-        synchronized(entities) {
+        else{
+            synchronized(entities) {
 
 
-            for (entity in entities.reversed()) {
-                if (entity.contains(normalizedX, normalizedY)) {
-                    draggingEntity = entity
-                    isDragging = false
-                    isHolding = false
-                    ori_pos = entity.position.copyOf()
+                for (entity in entities.reversed()) {
+                    if (entity.contains(normalizedX, normalizedY)) {
+                        draggingEntity = entity
+                        isDragging = false
+                        isHolding = false
+                        ori_pos = entity.position.copyOf()
 
                     viewModel.audioManager.playAudio(R.raw.uiclick)
                     holdHandler.postDelayed(holdRunnable, 85)
                     return
                 }
             }
+
+            viewModel.updateUserCoins(150)
+
+            viewModel.removeTextInfo(coinsText)
+            coinsText.text = "150"
+            viewModel.addTextInfo(coinsText)
         }
-
-        viewModel.updateUserCoins(150)
-
-        viewModel.removeTextInfo(coinsText)
-        coinsText.text = "150"
-        viewModel.addTextInfo(coinsText)
-
 
     }
 
