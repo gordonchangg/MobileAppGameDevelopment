@@ -14,12 +14,12 @@ class GameScene : IScene {
 
     lateinit var coinsText : TextInfo
 
-    val gridWidth = 8
-    val gridHeight = 10
+    val gridWidth = 6
+    val gridHeight = 6
     val gridMinX = -0.4f
     val gridMaxX = 0.4f
     val gridMinY = 0.4f
-    val gridMaxY = -0.6f
+    val gridMaxY = -0.5f
     val cellWidth = (gridMaxX - gridMinX) / gridWidth
     val cellHeight = (gridMaxY - gridMinY) / gridHeight
     val gridThickness = 0.01f
@@ -110,7 +110,7 @@ class GameScene : IScene {
         // Add game entities
         addEntityToCell(2, 3, producer_book)
         addEntityToCell(5, 5, producer_seed)
-        addEntityToCell(3, 7, producer_wheatplant)
+        addEntityToCell(3, 5, producer_wheatplant)
 
         toShopSceneButton = entityManager.createEntity(R.drawable.shopicon)
         toShopSceneButton.position = floatArrayOf(0.3f, -0.87f, 0f)
@@ -158,7 +158,7 @@ class GameScene : IScene {
                     isHolding = false
                     ori_pos = entity.position.copyOf()
 
-                    viewModel.audioManager.playAudio(R.raw.click)
+                    viewModel.audioManager.playAudio(R.raw.uiclick)
                     holdHandler.postDelayed(holdRunnable, 85)
                     return
                 }
@@ -252,8 +252,10 @@ class GameScene : IScene {
             } else {
 
                 if (!isCellOccupied(gridX, gridY, excludeEntity = draggingEntity)) {
+                    viewModel.audioManager.playAudio(R.raw.mainmenuclick)
                     draggingEntity!!.position = getCellCenter(gridX, gridY, gridMinX, gridMinY, cellWidth, cellHeight)
                     println("Entity placed successfully at ($gridX, $gridY)")
+
                 } else {
                     val existingEntity = getEntityInCell(gridX, gridY, excludeEntity = draggingEntity)
                     val newTexture = getNextMergeTexture(draggingEntity!!.textureId)
@@ -262,7 +264,7 @@ class GameScene : IScene {
                         newTexture?.let {
                             // ✅ Only update if `newTexture` is NOT null
                             existingEntity.textureId = it
-
+                            viewModel.audioManager.playAudio(R.raw.shaking)
                             println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
 
                             // ✅ Delete the second entity off-screen
@@ -281,6 +283,7 @@ class GameScene : IScene {
                             if (newX != -1 && newY != -1) {
                                 draggingEntity!!.position =
                                     getCellCenter(newX, newY, gridMinX, gridMinY, cellWidth, cellHeight)
+
                                 println("Cell occupied! Moved entity to nearest empty cell ($newX, $newY)")
                             } else {
                                 draggingEntity!!.position = ori_pos.copyOf()
@@ -343,6 +346,7 @@ class GameScene : IScene {
                                         cellWidth,
                                         cellHeight
                                     )
+                                viewModel.audioManager.playAudio(R.raw.scoop2)
                                 println("Cell occupied! Moved entity to nearest empty cell ($newX, $newY)")
                             } else {
                                 draggingEntity!!.position = ori_pos.copyOf()
