@@ -30,7 +30,7 @@ class ShopScene : IScene {
     lateinit var toGameSceneButton: Entity
 
     override fun onSurfaceCreated() {
-        repeat(5) { index ->
+        repeat(1) { index ->
             val entity = entityManager.createEntity(R.drawable.placeholder_customer)
             entity.position = floatArrayOf(-0.8f, 0.8f, 0f)
             entity.scale = floatArrayOf(0.3f, 0.3f, 1f)
@@ -63,25 +63,33 @@ class ShopScene : IScene {
             for (entity in entities) {
                 if (entity == toGameSceneButton) continue
 
+                // Safely retrieve user data fields
                 val path = entity.userData["path"] as? List<FloatArray> ?: emptyList()
-                var progress = entity.userData["progress"] as Float
-                val speed = entity.userData["speed"] as Float
+                var progress = entity.userData["progress"] as? Float ?: 0.1f
+                val speed = entity.userData["speed"] as? Float ?: 0.1f
 
+                // Skip the entity if the path is empty
+                if (path.isEmpty()) {
+                    continue
+                }
+
+                // Update progress
                 progress += 0.0167f * speed
-
                 while (progress >= path.size) {
                     progress -= path.size.toFloat()
                 }
 
+                // Interpolate position
                 val segmentIndex = progress.toInt()
                 val t = progress - segmentIndex
                 val start = path[segmentIndex % path.size]
                 val end = path[(segmentIndex + 1) % path.size]
-
                 entity.position = interpolate(start, end, t)
 
+                // Update progress in user data
                 entity.userData["progress"] = progress
             }
+
         }
 
         entityManager.setBackgroundTexture(R.drawable.placeholder_bg)
