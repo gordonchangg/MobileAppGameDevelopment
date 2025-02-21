@@ -11,16 +11,21 @@ class AudioManager {
         this.context = context
     }
 
-    fun playAudio(audioId : Int) {
-        // Initialize MediaPlayer with a resource
+    fun playBGM(audioId: Int) {
         mediaPlayer = MediaPlayer.create(context, audioId)
 
-        // Set up listeners (optional)
+        mediaPlayer?.isLooping = true
+
+        mediaPlayer?.start()
+    }
+
+    fun playAudio(audioId : Int) {
+        mediaPlayer = MediaPlayer.create(context, audioId)
+
         mediaPlayer?.setOnCompletionListener {
             println("Playback completed")
         }
 
-        // Start playback
         mediaPlayer?.start()
     }
 
