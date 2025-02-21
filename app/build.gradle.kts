@@ -153,7 +153,7 @@ dependencies {
 
     implementation("com.google.firebase:firebase-firestore")
 
-    implementation ("com.google.accompanist:accompanist-permissions:0.32.0")
+    implementation ("com.google.accompanist:accompanist-permissions:0.37.1")
 
     //coil for image loading
     implementation("io.coil-kt.coil3:coil-compose:3.1.0")
