@@ -48,6 +48,10 @@ class GameScene : IScene {
         }
     }
 
+    lateinit var toShopSceneButton: Entity
+
+    private var isLongPress = false
+
     // Producers
     val producer_seed = R.drawable.seedpack
     val producer_wheatplant = R.drawable.wheatplant
@@ -67,8 +71,8 @@ class GameScene : IScene {
 
 
     override fun onSurfaceCreated() {
-        val lightColor = floatArrayOf(0.863f, 0.733f, 0.537f, 1f) // Extracted light beige
-        val darkColor = floatArrayOf(0.835f, 0.702f, 0.510f, 1f)
+        val lightColor = floatArrayOf(0.984f, 0.835f, 0.588f, 1f) // F4D596 (Pale Yellow)
+        val darkColor = floatArrayOf(0.859f, 0.694f, 0.475f, 1f) // DB
 
         for (x in 0 until gridWidth) {
             for (y in 0 until gridHeight) {
@@ -108,6 +112,11 @@ class GameScene : IScene {
         addEntityToCell(5, 5, producer_seed)
         addEntityToCell(3, 7, producer_wheatplant)
 
+        toShopSceneButton = entityManager.createEntity(R.drawable.shopicon)
+        toShopSceneButton.position = floatArrayOf(0.3f, -0.87f, 0f)
+        toShopSceneButton.scale = floatArrayOf(0.21f, 0.21f, 0.21f)
+        entities.add(toShopSceneButton)
+
         coinsText = TextInfo("100")
         coinsText.offsetX = 150.dp
         coinsText.offsetY = (-230).dp
@@ -134,7 +143,14 @@ class GameScene : IScene {
     }
 
     override fun onActionDown(normalizedX: Float, normalizedY: Float) {
+
+        if(toShopSceneButton.contains(normalizedX, normalizedY)){
+
+            sceneManager?.setScene(ShopScene::class, viewModel)
+        }
         synchronized(entities) {
+
+
             for (entity in entities.reversed()) {
                 if (entity.contains(normalizedX, normalizedY)) {
                     draggingEntity = entity
@@ -142,6 +158,7 @@ class GameScene : IScene {
                     isHolding = false
                     ori_pos = entity.position.copyOf()
 
+                    viewModel.audioManager.playAudio(R.raw.click)
                     holdHandler.postDelayed(holdRunnable, 90)
                     return
                 }
@@ -153,6 +170,8 @@ class GameScene : IScene {
         viewModel.removeTextInfo(coinsText)
         coinsText.text = "150"
         viewModel.addTextInfo(coinsText)
+
+
     }
 
     fun getEntityInCell(xIndex: Int, yIndex: Int, excludeEntity: Entity? = null): Entity? {
@@ -203,9 +222,14 @@ class GameScene : IScene {
 
 
     override fun onActionUp() {
+
         holdHandler.removeCallbacks(holdRunnable) // Stop hold detection
 
         if (draggingEntity != null) {
+            if (!isHolding) {
+                // ✅ If the user didn't hold, play a tap sound
+                viewModel.audioManager.playAudio(R.raw.scoop)
+            }
             // Convert entity position to grid indices BEFORE updating position
             val previousX = ((ori_pos[0] - gridMinX) / cellWidth).toInt().coerceIn(0, gridWidth - 1)
             val previousY = ((ori_pos[1] - gridMinY) / cellHeight).toInt().coerceIn(0, gridHeight - 1)
@@ -215,6 +239,7 @@ class GameScene : IScene {
 
             println("Trying to place entity at ($gridX, $gridY) - Occupied before update: ${isCellOccupied(gridX, gridY, excludeEntity = draggingEntity)}")
 
+            //spawning
             if (!isHolding) {
                 val ingredientTexture = producerToIngredient[draggingEntity!!.textureId]
                 if (ingredientTexture != null) {
@@ -225,6 +250,7 @@ class GameScene : IScene {
                     }
                 }
             } else {
+
                 if (!isCellOccupied(gridX, gridY, excludeEntity = draggingEntity)) {
                     draggingEntity!!.position = getCellCenter(gridX, gridY, gridMinX, gridMinY, cellWidth, cellHeight)
                     println("Entity placed successfully at ($gridX, $gridY)")

@@ -40,9 +40,9 @@ class ShopScene : IScene {
             entities.add(entity)
         }
 
-        toGameSceneButton = entityManager.createEntity(R.drawable.placeholder_customer)
-        toGameSceneButton.position = floatArrayOf(0f, -0.8f, 0f)
-        toGameSceneButton.scale = floatArrayOf(0.5f, 0.5f, 0.5f)
+        toGameSceneButton = entityManager.createEntity(R.drawable.bakery)
+        toGameSceneButton.position = floatArrayOf(0.3f, -0.87f, 0f)
+        toGameSceneButton.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
         entities.add(toGameSceneButton)
     }
 
