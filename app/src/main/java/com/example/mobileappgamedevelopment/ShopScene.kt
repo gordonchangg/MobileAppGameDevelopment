@@ -22,6 +22,7 @@ class ShopScene : IScene {
     lateinit var table: Entity
     lateinit var table1: Entity
     lateinit var table2: Entity
+    lateinit var plate: Entity
 
 
     private val path = listOf(
@@ -35,6 +36,23 @@ class ShopScene : IScene {
     lateinit var toGameSceneButton: Entity
 
     override fun onSurfaceCreated() {
+
+        //plate
+        plate  =entityManager.createEntity(R.drawable.plate)
+        plate.position = floatArrayOf(-0.33f, 0.41f, 0f)
+        plate.scale = floatArrayOf(0.15f, 0.1f, 0.1f)
+        entities.add(plate)
+
+        plate  =entityManager.createEntity(R.drawable.plate)
+        plate.position = floatArrayOf(-0.15f, 0.41f, 0f)
+        plate.scale = floatArrayOf(0.15f, 0.1f, 0.1f)
+        entities.add(plate)
+
+        plate  =entityManager.createEntity(R.drawable.plate)
+        plate.position = floatArrayOf(0.03f, 0.41f, 0f)
+        plate.scale = floatArrayOf(0.15f, 0.1f, 0.1f)
+        entities.add(plate)
+
         repeat(1) { index ->
             val entity = entityManager.createEntity(R.drawable.placeholder_customer)
             entity.position = floatArrayOf(-0.8f, 0.8f, 0f)
@@ -70,6 +88,7 @@ class ShopScene : IScene {
         table.position = floatArrayOf(0.16f, -0.5f, 0f)
         table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
         entities.add(table)
+
 
     }
 
