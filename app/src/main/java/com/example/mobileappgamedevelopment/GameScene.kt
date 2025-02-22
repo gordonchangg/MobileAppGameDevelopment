@@ -63,6 +63,7 @@ class GameScene : IScene {
     lateinit var latte: Entity
     lateinit var cupcake: Entity
     lateinit var cake: Entity
+    lateinit var coinIcon: Entity
 
     // Producers
     val producer_seed = R.drawable.seedpack
@@ -81,94 +82,98 @@ class GameScene : IScene {
         R.drawable.wheat to listOf(R.drawable.wheat,R.drawable.stackfowheat, R.drawable.flour, R.drawable.sponge, R.drawable.cupcake)
     )
 
-
     override fun onSurfaceCreated() {
-        val lightColor = floatArrayOf(0.984f, 0.835f, 0.588f, 1f) // F4D596 (Pale Yellow)
-        val darkColor = floatArrayOf(0.859f, 0.694f, 0.475f, 1f) // DB
-
-        //button
-        cake = entityManager.createEntity(R.drawable.nrycake)
-        cake.position = floatArrayOf(-0.30f, 0.48f, 0f)
-        cake.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
-        entities.add(cake)
-
-        cupcake = entityManager.createEntity(R.drawable.nrycupcake)
-        cupcake.position = floatArrayOf(-0.10f, 0.48f, 0f)
-        cupcake.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
-        entities.add(cupcake)
-
-        latte = entityManager.createEntity(R.drawable.nrylatte)
-        latte.position = floatArrayOf(0.10f, 0.48f, 0f)
-        latte.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
-        entities.add(latte)
-
-        for (x in 0 until gridWidth) {
-            for (y in 0 until gridHeight) {
-                val color = if ((x + y) % 2 == 0) lightColor else darkColor
-
-                // Calculate the center position of the square
-                val centerX = gridMinX + x * cellWidth + cellWidth / 2
-                val centerY = gridMinY + y * cellHeight + cellHeight / 2
-
-                // Use thick lines to fill the cell
-                val thicknessX = cellWidth * 0.95f // Almost full width
-                val thicknessY = cellHeight * 0.95f // Almost full height
-
-                // Create filled rectangles using horizontal and vertical thick lines
-                lines.add(LineInfo(floatArrayOf(centerX - cellWidth / 2, centerY, 0f), floatArrayOf(centerX + cellWidth / 2, centerY, 0f), thicknessY, color))
-                lines.add(LineInfo(floatArrayOf(centerX, centerY - cellHeight / 2, 0f), floatArrayOf(centerX, centerY + cellHeight / 2, 0f), thicknessX, color))
-            }
-        }
-
-        // Draw grid lines on top
-        for (i in 0..gridHeight) {
-            val y = gridMinY + i * cellHeight
-            val start = floatArrayOf(gridMinX, y, 0f)
-            val end = floatArrayOf(gridMaxX, y, 0f)
-            lines.add(LineInfo(start, end, gridThickness, gridColor))
-        }
-
-        for (i in 0..gridWidth) {
-            val x = gridMinX + i * cellWidth
-            val start = floatArrayOf(x, gridMinY, 0f)
-            val end = floatArrayOf(x, gridMaxY, 0f)
-            lines.add(LineInfo(start, end, gridThickness, gridColor))
-        }
-
-        // Add game entities
-        addEntityToCell(2, 3, producer_book)
-        addEntityToCell(5, 5, producer_seed)
-        addEntityToCell(3, 5, producer_wheatplant)
-
-
-        //testing========================================
-        addEntityToCell(4, 5, R.drawable.strawberrcake)
-        addEntityToCell(0, 1, R.drawable.cupcake)
-        addEntityToCell(0, 2, R.drawable.latte)
-        //==================================================
-
-        toShopSceneButton = entityManager.createEntity(R.drawable.shopicon)
-        toShopSceneButton.position = floatArrayOf(0.3f, -0.87f, 0f)
-        toShopSceneButton.scale = floatArrayOf(0.21f, 0.21f, 0.21f)
-        entities.add(toShopSceneButton)
+            val lightColor = floatArrayOf(0.984f, 0.835f, 0.588f, 1f) // F4D596 (Pale Yellow)
+            val darkColor = floatArrayOf(0.859f, 0.694f, 0.475f, 1f) // DB
 
         // Initialize coins text
         coinsText = TextInfo("0") // Start with 0, will be updated
-        coinsText.offsetX = 150.dp
-        coinsText.offsetY = (-230).dp
+        coinsText.offsetX = 160.dp
+        coinsText.offsetY = (-140).dp
         viewModel.addTextInfo(coinsText)
 
-        // 🪙 Observe changes in coins LiveData and update UI
-        viewModel.coins.observeForever { newCoins ->
-            viewModel.removeTextInfo(coinsText)
-            coinsText.text = "$newCoins" // Update text dynamically
-            println("🪙 Coins updated in GameScene: $newCoins") // Debug log
-            viewModel.addTextInfo(coinsText)
+        coinIcon = entityManager.createEntity(R.drawable.coin)
+        coinIcon.position = floatArrayOf(0.23f, 0.31f, 0f)
+        coinIcon.scale = floatArrayOf(0.07f, 0.07f, 0.07f)
+        entities.add(coinIcon)
 
-        }
+            //button
+            cake = entityManager.createEntity(R.drawable.nrycake)
+            cake.position = floatArrayOf(-0.30f, 0.48f, 0f)
+            cake.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+            entities.add(cake)
 
-        // Fetch initial coin value from Firebase
-        viewModel.getCurrentUserCoins()
+            cupcake = entityManager.createEntity(R.drawable.nrycupcake)
+            cupcake.position = floatArrayOf(-0.10f, 0.48f, 0f)
+            cupcake.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+            entities.add(cupcake)
+
+            latte = entityManager.createEntity(R.drawable.nrylatte)
+            latte.position = floatArrayOf(0.10f, 0.48f, 0f)
+            latte.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+            entities.add(latte)
+
+            for (x in 0 until gridWidth) {
+                for (y in 0 until gridHeight) {
+                    val color = if ((x + y) % 2 == 0) lightColor else darkColor
+
+                    // Calculate the center position of the square
+                    val centerX = gridMinX + x * cellWidth + cellWidth / 2
+                    val centerY = gridMinY + y * cellHeight + cellHeight / 2
+
+                    // Use thick lines to fill the cell
+                    val thicknessX = cellWidth * 0.95f // Almost full width
+                    val thicknessY = cellHeight * 0.95f // Almost full height
+
+                    // Create filled rectangles using horizontal and vertical thick lines
+                    lines.add(LineInfo(floatArrayOf(centerX - cellWidth / 2, centerY, 0f), floatArrayOf(centerX + cellWidth / 2, centerY, 0f), thicknessY, color))
+                    lines.add(LineInfo(floatArrayOf(centerX, centerY - cellHeight / 2, 0f), floatArrayOf(centerX, centerY + cellHeight / 2, 0f), thicknessX, color))
+                }
+            }
+
+            // Draw grid lines on top
+            for (i in 0..gridHeight) {
+                val y = gridMinY + i * cellHeight
+                val start = floatArrayOf(gridMinX, y, 0f)
+                val end = floatArrayOf(gridMaxX, y, 0f)
+                lines.add(LineInfo(start, end, gridThickness, gridColor))
+            }
+
+            for (i in 0..gridWidth) {
+                val x = gridMinX + i * cellWidth
+                val start = floatArrayOf(x, gridMinY, 0f)
+                val end = floatArrayOf(x, gridMaxY, 0f)
+                lines.add(LineInfo(start, end, gridThickness, gridColor))
+            }
+
+            // Add game entities
+            addEntityToCell(2, 3, producer_book)
+            addEntityToCell(5, 5, producer_seed)
+            addEntityToCell(3, 5, producer_wheatplant)
+
+
+            //testing========================================
+            addEntityToCell(4, 5, R.drawable.strawberrcake)
+            addEntityToCell(0, 1, R.drawable.cupcake)
+            addEntityToCell(0, 2, R.drawable.latte)
+            //==================================================
+
+            toShopSceneButton = entityManager.createEntity(R.drawable.shopicon)
+            toShopSceneButton.position = floatArrayOf(0.3f, -0.87f, 0f)
+            toShopSceneButton.scale = floatArrayOf(0.21f, 0.21f, 0.21f)
+            entities.add(toShopSceneButton)
+
+            // 🪙 Observe changes in coins LiveData and update UI
+            viewModel.coins.observeForever { newCoins ->
+                viewModel.removeTextInfo(coinsText)
+                coinsText.text = "$newCoins" // Update text dynamically
+                println("🪙 Coins updated in GameScene: $newCoins") // Debug log
+                viewModel.addTextInfo(coinsText)
+
+            }
+
+            // Fetch initial coin value from Firebase
+            viewModel.getCurrentUserCoins()
 
     }
 
@@ -249,7 +254,13 @@ class GameScene : IScene {
         }
         else {
             synchronized(entities) {
-
+                val filteredEntities = entities.filterNot { entity ->
+                    entity == toShopSceneButton ||
+                            entity == latte ||
+                            entity == cupcake ||
+                            entity == cake ||
+                            entity == coinIcon
+                }
 
                 for (entity in entities.reversed()) {
                     if (entity.contains(normalizedX, normalizedY)) {
@@ -370,17 +381,17 @@ class GameScene : IScene {
             if (!isHolding) {
                 val ingredientTexture = producerToIngredient[draggingEntity!!.textureId]
 
-//                    val hasEnoughCoins = when (draggingEntity!!.textureId) {
-//                        producer_seed -> viewModel.deductCoins(5)
-//                        producer_wheatplant -> viewModel.deductCoins(10)
-//                        producer_book -> viewModel.deductCoins(15)
-//                        else -> true // Default case (no deduction needed)
-//                    }
+                    val hasEnoughCoins = when (draggingEntity!!.textureId) {
+                        producer_seed -> viewModel.subtractCoins(5)
+                        producer_wheatplant -> viewModel.subtractCoins(10)
+                        producer_book -> viewModel.subtractCoins(15)
+                        else -> true // Default case (no deduction needed)
+                    }
 
-//                    if (!hasEnoughCoins) {
-//                        // Play sound when the player does not have enough coins
-//                        viewModel.audioManager.playAudio(R.raw.shaking)
-//                    }
+                    if (!hasEnoughCoins) {
+                        // Play sound when the player does not have enough coins
+                        viewModel.audioManager.playAudio(R.raw.shaking)
+                    }
                 if (ingredientTexture != null) {
                     val (xIndex, yIndex) = findNextAvailableGridCellNearProducer(draggingEntity!!)
                     if (xIndex != -1 && yIndex != -1) {
