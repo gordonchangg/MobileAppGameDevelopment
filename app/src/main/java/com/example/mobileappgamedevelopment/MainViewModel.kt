@@ -8,8 +8,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import coil3.Bitmap
 import com.google.firebase.database.ValueEventListener
+import kotlinx.serialization.Serializable
 import java.io.File
 import java.util.concurrent.ConcurrentLinkedQueue
+
+@Serializable
+data class FoodItem(val name: String, val imageRes: Int)
 
 class MainViewModel() : ViewModel() {
     var entityManager = EntityManager()
@@ -21,10 +25,30 @@ class MainViewModel() : ViewModel() {
     private val _textInfoList = MutableLiveData<MutableList<TextInfo>>(mutableListOf())
     val textInfoList: LiveData<MutableList<TextInfo>> = _textInfoList
 
+    private val _foodItems = MutableLiveData<MutableList<FoodItem>>(mutableListOf())
+    val foodItems: MutableLiveData<MutableList<FoodItem>> = _foodItems
+
     fun addTextInfo(textInfo: TextInfo) {
         val currentList = _textInfoList.value?.toMutableList() ?: mutableListOf()
         currentList.add(textInfo)
         _textInfoList.value = currentList
+    }
+    fun addFoodItem(food: FoodItem) {
+        val currentList = _foodItems.value ?: mutableListOf()
+        currentList.add(food)
+        _foodItems.value = currentList
+    }
+
+    // ✅ Remove a food item from the global list
+    fun removeFoodItem(food: FoodItem) {
+        val currentList = _foodItems.value ?: mutableListOf()
+        currentList.remove(food)
+        _foodItems.value = currentList
+    }
+
+    // ✅ Clear all food items
+    fun clearFoodItems() {
+        _foodItems.value = mutableListOf()
     }
 
     fun removeTextInfo(textInfo: TextInfo) {
