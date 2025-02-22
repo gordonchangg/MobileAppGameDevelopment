@@ -32,20 +32,23 @@ class MainViewModel() : ViewModel() {
         currentList.add(textInfo)
         _textInfoList.value = currentList
     }
+
+    fun isFoodItemExists(food: String): Boolean {
+        return _foodItems.value?.contains(food) == true
+    }
+
     fun addFoodItem(food: String) {
         val currentList = _foodItems.value ?: mutableListOf()
         currentList.add(food)
         _foodItems.value = currentList
     }
 
-    // ✅ Remove a food item from the global list
     fun removeFoodItem(food: String) {
         val currentList = _foodItems.value ?: mutableListOf()
         currentList.remove(food)
         _foodItems.value = currentList
     }
 
-    // ✅ Clear all food items
     fun clearFoodItems() {
         _foodItems.value = mutableListOf()
     }

@@ -19,12 +19,6 @@ class ShopScene : IScene {
     override val lines: MutableList<LineInfo> = mutableListOf()
     override lateinit var viewModel: MainViewModel
 
-    lateinit var table: Entity
-    lateinit var table1: Entity
-    lateinit var table2: Entity
-    lateinit var plate: Entity
-
-
     private val path = listOf(
         floatArrayOf(0.3f, 0.45f, 0f),
         floatArrayOf(0.3f, 0.25f, 0f),
@@ -34,6 +28,13 @@ class ShopScene : IScene {
     )
 
     lateinit var toGameSceneButton: Entity
+    lateinit var table: Entity
+    lateinit var plate: Entity
+    //food items
+    lateinit var cake: Entity
+    lateinit var cupcake: Entity
+    lateinit var latte: Entity
+
 
     override fun onSurfaceCreated() {
 
@@ -73,22 +74,38 @@ class ShopScene : IScene {
         table.position = floatArrayOf(-0.16f, -0.1f, 0f)
         table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
         entities.add(table)
-
         table  =entityManager.createEntity(R.drawable.table)
         table.position = floatArrayOf(-0.16f, -0.5f, 0f)
         table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
         entities.add(table)
-
         table  =entityManager.createEntity(R.drawable.table)
         table.position = floatArrayOf(0.16f, -0.1f, 0f)
         table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
         entities.add(table)
-
         table  =entityManager.createEntity(R.drawable.table)
         table.position = floatArrayOf(0.16f, -0.5f, 0f)
         table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
         entities.add(table)
 
+
+        //add food items
+        cake =  entityManager.createEntity(R.drawable.strawberrcake)
+        //cake.position = floatArrayOf(-0.325f, 0.45f, 0f)
+        cake.position = floatArrayOf(-1f, -1f, 0f)
+        cake.scale = floatArrayOf(0.14f, 0.14f, 0.14f)
+        entities.add(cake)
+
+        cupcake =  entityManager.createEntity(R.drawable.cupcake)
+        //cupcake.position = floatArrayOf(-0.155f, 0.435f, 0f)
+        cupcake.position = floatArrayOf(-1f, -1f, 0f)
+        cupcake.scale = floatArrayOf(0.14f, 0.14f, 0.14f)
+        entities.add(cupcake)
+
+        latte =  entityManager.createEntity(R.drawable.latte)
+        //latte.position = floatArrayOf(0.03f, 0.445f, 0f)
+        latte.position = floatArrayOf(-1f, -1f, 0f)
+        latte.scale = floatArrayOf(0.14f, 0.14f, 0.14f)
+        entities.add(latte)
 
     }
 
@@ -105,6 +122,18 @@ class ShopScene : IScene {
     }
 
     override fun update() {
+
+        if(viewModel.isFoodItemExists("cake")){
+            cake.position = floatArrayOf(-0.325f, 0.45f, 0f)
+        }
+        if(viewModel.isFoodItemExists("cupcake")){
+            cupcake.position = floatArrayOf(-0.155f, 0.435f, 0f)
+        }
+        if(viewModel.isFoodItemExists("latte")){
+            latte.position = floatArrayOf(0.03f, 0.445f, 0f)
+        }
+
+
         synchronized(entities) {
             for (entity in entities) {
                 if (entity == toGameSceneButton) continue
