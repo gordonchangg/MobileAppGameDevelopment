@@ -18,8 +18,8 @@ class GameScene : IScene {
     val gridHeight = 6
     val gridMinX = -0.4f
     val gridMaxX = 0.4f
-    val gridMinY = 0.4f
-    val gridMaxY = -0.5f
+    val gridMinY = 0.31f
+    val gridMaxY = -0.59f
     val cellWidth = (gridMaxX - gridMinX) / gridWidth
     val cellHeight = (gridMaxY - gridMinY) / gridHeight
     val gridThickness = 0.01f
@@ -41,6 +41,12 @@ class GameScene : IScene {
     private var isHolding = false
     private val holdHandler = Handler(Looper.getMainLooper())
 
+    //send to cafe booleans
+    private var sendToCafe_cake = false
+    private var sendToCafe_cupcake = false
+    private var sendToCafe_latte = false
+
+
     private val holdRunnable = Runnable {
         if (draggingEntity != null) {
             isHolding = true
@@ -49,8 +55,9 @@ class GameScene : IScene {
     }
 
     lateinit var toShopSceneButton: Entity
-
-    private var isLongPress = false
+    lateinit var latte: Entity
+    lateinit var cupcake: Entity
+    lateinit var cake: Entity
 
     // Producers
     val producer_seed = R.drawable.seedpack
@@ -112,10 +119,34 @@ class GameScene : IScene {
         addEntityToCell(5, 5, producer_seed)
         addEntityToCell(3, 5, producer_wheatplant)
 
+
+        //testing========================================
+        addEntityToCell(4, 5, R.drawable.strawberrcake)
+        addEntityToCell(0, 1, R.drawable.cupcake)
+        addEntityToCell(0, 2, R.drawable.latte)
+        //==================================================
+
         toShopSceneButton = entityManager.createEntity(R.drawable.shopicon)
         toShopSceneButton.position = floatArrayOf(0.3f, -0.87f, 0f)
         toShopSceneButton.scale = floatArrayOf(0.21f, 0.21f, 0.21f)
         entities.add(toShopSceneButton)
+
+        //button
+        cake = entityManager.createEntity(R.drawable.nrycake)
+        cake.position = floatArrayOf(-0.30f, 0.48f, 0f)
+        cake.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+        entities.add(cake)
+
+        cupcake = entityManager.createEntity(R.drawable.nrycupcake)
+        cupcake.position = floatArrayOf(-0.10f, 0.48f, 0f)
+        cupcake.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+        entities.add(cupcake)
+
+        latte = entityManager.createEntity(R.drawable.nrylatte)
+        latte.position = floatArrayOf(0.10f, 0.48f, 0f)
+        latte.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+        entities.add(latte)
+
 
         coinsText = TextInfo("100")
         coinsText.offsetX = 150.dp
@@ -129,6 +160,39 @@ class GameScene : IScene {
 
     override fun update() {
         entityManager.setBackgroundTexture(R.drawable.gamescreenbg)
+
+        //strawberrycake
+        if(doesEntityExist(R.drawable.strawberrcake)){
+            cake.textureId = R.drawable.scsendtocafe
+            sendToCafe_cake= true
+        }
+        //cupcake
+        if(doesEntityExist(R.drawable.cupcake)){
+            cupcake.textureId = R.drawable.cupcakesendtocafe
+            sendToCafe_cupcake = true
+        }
+        //latte
+        if(doesEntityExist(R.drawable.latte)){
+            latte.textureId = R.drawable.lattesendtocafe
+            sendToCafe_latte = true
+        }
+
+        //set back to false
+        if(!sendToCafe_cake){
+            cake.textureId = R.drawable.nrycake
+            cake.position = floatArrayOf(-0.30f, 0.48f, 0f)
+
+        }
+        if(!sendToCafe_cupcake){
+            cupcake.textureId = R.drawable.nrycupcake
+            cupcake.position = floatArrayOf(-0.10f, 0.48f, 0f)
+
+        }
+        if(!sendToCafe_latte){
+            latte.textureId = R.drawable.nrylatte
+            latte.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+
+        }
     }
 
     fun getEntityDrawableInCell(xIndex: Int, yIndex: Int): Int? {
@@ -148,7 +212,25 @@ class GameScene : IScene {
         if (toShopSceneButton.contains(normalizedX, normalizedY)) {
 
             sceneManager?.setScene(ShopScene::class, viewModel)
-        } else {
+        } else if(sendToCafe_cake && cake.contains(normalizedX, normalizedY)){
+            val deleteEntity: Entity = getEntityByTextureId(R.drawable.strawberrcake) ?: return
+            deleteEntity(deleteEntity)
+            viewModel.addFoodItem("cake")
+            sendToCafe_cake = false
+        }
+        else if(sendToCafe_cupcake && cupcake.contains(normalizedX, normalizedY)){
+            val deleteEntity: Entity = getEntityByTextureId(R.drawable.cupcake) ?: return
+            deleteEntity(deleteEntity)
+            viewModel.addFoodItem("cupcake")
+            sendToCafe_cupcake = false
+        }
+        else if(sendToCafe_latte && latte.contains(normalizedX, normalizedY)){
+            val deleteEntity: Entity = getEntityByTextureId(R.drawable.latte) ?: return
+            deleteEntity(deleteEntity)
+            viewModel.addFoodItem("latte")
+            sendToCafe_latte = false
+        }
+        else {
             synchronized(entities) {
 
 
@@ -445,6 +527,14 @@ class GameScene : IScene {
         }
     }
 
+    fun doesEntityExist(drawableId: Int): Boolean {
+        return entities.any { it.textureId == drawableId }
+    }
+
+    fun getEntityByTextureId(textureId: Int): Entity? {
+        return entities.find { it.textureId == textureId }
+    }
+
 
     fun findNextAvailableGridCellNearProducer(producer: Entity): Pair<Int, Int> {
         val producerX = ((producer.position[0] - gridMinX) / cellWidth).toInt()
@@ -471,3 +561,5 @@ class GameScene : IScene {
         return -1 to -1
     }
 }
+
+

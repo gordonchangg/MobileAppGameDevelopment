@@ -12,8 +12,7 @@ import kotlinx.serialization.Serializable
 import java.io.File
 import java.util.concurrent.ConcurrentLinkedQueue
 
-@Serializable
-data class FoodItem(val name: String, val imageRes: Int)
+
 
 class MainViewModel() : ViewModel() {
     var entityManager = EntityManager()
@@ -25,22 +24,22 @@ class MainViewModel() : ViewModel() {
     private val _textInfoList = MutableLiveData<MutableList<TextInfo>>(mutableListOf())
     val textInfoList: LiveData<MutableList<TextInfo>> = _textInfoList
 
-    private val _foodItems = MutableLiveData<MutableList<FoodItem>>(mutableListOf())
-    val foodItems: MutableLiveData<MutableList<FoodItem>> = _foodItems
+    private val _foodItems = MutableLiveData<MutableList<String>>(mutableListOf())
+    val foodItems: MutableLiveData<MutableList<String>> = _foodItems
 
     fun addTextInfo(textInfo: TextInfo) {
         val currentList = _textInfoList.value?.toMutableList() ?: mutableListOf()
         currentList.add(textInfo)
         _textInfoList.value = currentList
     }
-    fun addFoodItem(food: FoodItem) {
+    fun addFoodItem(food: String) {
         val currentList = _foodItems.value ?: mutableListOf()
         currentList.add(food)
         _foodItems.value = currentList
     }
 
     // ✅ Remove a food item from the global list
-    fun removeFoodItem(food: FoodItem) {
+    fun removeFoodItem(food: String) {
         val currentList = _foodItems.value ?: mutableListOf()
         currentList.remove(food)
         _foodItems.value = currentList
