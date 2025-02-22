@@ -43,8 +43,8 @@ class GameScene : IScene {
     private var draggingEntity: Entity? = null
     private var isDragging = false
     private var isHolding = false
+    private var isRecipeBookOpen = false
     private val holdHandler = Handler(Looper.getMainLooper())
-    private var coins: UInt = 0u
 
     //send to cafe booleans
     private var sendToCafe_cake = false
@@ -64,6 +64,8 @@ class GameScene : IScene {
     lateinit var cupcake: Entity
     lateinit var cake: Entity
     lateinit var coinIcon: Entity
+    lateinit var recipeIcon: Entity
+    lateinit var recipebook: Entity
 
     // Producers
     val producer_seed = R.drawable.seedpack
@@ -86,6 +88,12 @@ class GameScene : IScene {
             val lightColor = floatArrayOf(0.984f, 0.835f, 0.588f, 1f) // F4D596 (Pale Yellow)
             val darkColor = floatArrayOf(0.859f, 0.694f, 0.475f, 1f) // DB
 
+        //button
+        cake = entityManager.createEntity(R.drawable.nrycake)
+        cake.position = floatArrayOf(-0.30f, 0.48f, 0f)
+        cake.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+        entities.add(cake)
+
         // Initialize coins text
         coinsText = TextInfo("0") // Start with 0, will be updated
         coinsText.offsetX = 160.dp
@@ -97,11 +105,7 @@ class GameScene : IScene {
         coinIcon.scale = floatArrayOf(0.07f, 0.07f, 0.07f)
         entities.add(coinIcon)
 
-            //button
-            cake = entityManager.createEntity(R.drawable.nrycake)
-            cake.position = floatArrayOf(-0.30f, 0.48f, 0f)
-            cake.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
-            entities.add(cake)
+
 
             cupcake = entityManager.createEntity(R.drawable.nrycupcake)
             cupcake.position = floatArrayOf(-0.10f, 0.48f, 0f)
@@ -112,6 +116,16 @@ class GameScene : IScene {
             latte.position = floatArrayOf(0.10f, 0.48f, 0f)
             latte.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
             entities.add(latte)
+
+            recipeIcon = entityManager.createEntity(R.drawable.recipe)
+            recipeIcon.position = floatArrayOf(0.095f, -0.87f, 0f)
+            recipeIcon.scale = floatArrayOf(0.186f, 0.186f, 0.19f)
+            entities.add(recipeIcon)
+
+            recipebook = entityManager.createEntity(R.drawable.recipe)
+            recipebook.position = floatArrayOf(-1.0f, -1.0f, 0f)
+            recipebook.scale = floatArrayOf(0.3f, 0.3f, 0.3f)
+            entities.add(recipebook)
 
             for (x in 0 until gridWidth) {
                 for (y in 0 until gridHeight) {
@@ -233,8 +247,16 @@ class GameScene : IScene {
     override fun onActionDown(normalizedX: Float, normalizedY: Float) {
 
         if (toShopSceneButton.contains(normalizedX, normalizedY)) {
+            viewModel.removeTextInfo(coinsText)
             sceneManager?.setScene(ShopScene::class, viewModel)
-        } else if(sendToCafe_cake && cake.contains(normalizedX, normalizedY)){
+        }
+        else if (recipeIcon.contains(normalizedX, normalizedY)) {
+            recipebook.position = floatArrayOf(0.0f, 0.0f, 0f)
+        }
+        else if (recipebook.contains(normalizedX, normalizedY)) {
+            recipebook.position = floatArrayOf(-1.0f, -1.0f, 0f)
+
+        }else if(sendToCafe_cake && cake.contains(normalizedX, normalizedY)){
             val deleteEntity: Entity = getEntityByTextureId(R.drawable.strawberrcake) ?: return
             deleteEntity(deleteEntity)
             viewModel.addFoodItem("cake")
@@ -259,10 +281,12 @@ class GameScene : IScene {
                             entity == latte ||
                             entity == cupcake ||
                             entity == cake ||
+                            entity == recipeIcon ||
+                            entity == recipebook ||
                             entity == coinIcon
                 }
 
-                for (entity in entities.reversed()) {
+                for (entity in filteredEntities.reversed()) {
                     if (entity.contains(normalizedX, normalizedY)) {
                         draggingEntity = entity
                         isDragging = false

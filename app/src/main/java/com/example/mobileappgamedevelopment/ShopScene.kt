@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import coil3.Bitmap
 import kotlinx.coroutines.CoroutineScope
@@ -35,9 +36,7 @@ class ShopScene : IScene {
     lateinit var cupcake: Entity
     lateinit var latte: Entity
 
-
     override fun onSurfaceCreated() {
-
         //plate
         plate  =entityManager.createEntity(R.drawable.plate)
         plate.position = floatArrayOf(-0.33f, 0.41f, 0f)
