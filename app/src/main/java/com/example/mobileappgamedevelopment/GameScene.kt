@@ -88,6 +88,7 @@ class GameScene : IScene {
             val lightColor = floatArrayOf(0.984f, 0.835f, 0.588f, 1f) // F4D596 (Pale Yellow)
             val darkColor = floatArrayOf(0.859f, 0.694f, 0.475f, 1f) // DB
 
+
         //button
         cake = entityManager.createEntity(R.drawable.nrycake)
         cake.position = floatArrayOf(-0.30f, 0.48f, 0f)
@@ -122,10 +123,6 @@ class GameScene : IScene {
             recipeIcon.scale = floatArrayOf(0.186f, 0.186f, 0.19f)
             entities.add(recipeIcon)
 
-            recipebook = entityManager.createEntity(R.drawable.recipe)
-            recipebook.position = floatArrayOf(-1.0f, -1.0f, 0f)
-            recipebook.scale = floatArrayOf(0.3f, 0.3f, 0.3f)
-            entities.add(recipebook)
 
             for (x in 0 until gridWidth) {
                 for (y in 0 until gridHeight) {
@@ -176,6 +173,11 @@ class GameScene : IScene {
             toShopSceneButton.position = floatArrayOf(0.3f, -0.87f, 0f)
             toShopSceneButton.scale = floatArrayOf(0.21f, 0.21f, 0.21f)
             entities.add(toShopSceneButton)
+
+        recipebook = entityManager.createEntity(R.drawable.recipe)
+        recipebook.position = floatArrayOf(-1.0f, -1.0f, 0f)
+        recipebook.scale = floatArrayOf(0.3f, 0.3f, 0.3f)
+        entities.add(recipebook)
 
             // 🪙 Observe changes in coins LiveData and update UI
             viewModel.coins.observeForever { newCoins ->
