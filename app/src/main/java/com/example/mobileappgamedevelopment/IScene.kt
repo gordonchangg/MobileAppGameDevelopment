@@ -54,7 +54,7 @@ class SceneManager(private val entityManager: EntityManager){
         }
     }
 
-    fun onSurfaceChanged(){
+    fun  onSurfaceChanged(){
         currentScene?.onSurfaceChanged()
     }
 

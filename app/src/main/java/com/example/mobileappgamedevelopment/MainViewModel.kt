@@ -8,10 +8,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import coil3.Bitmap
 import com.google.firebase.database.ValueEventListener
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import java.io.File
 import java.util.concurrent.ConcurrentLinkedQueue
-
 
 
 class MainViewModel() : ViewModel() {
@@ -23,6 +27,9 @@ class MainViewModel() : ViewModel() {
 
     private val _textInfoList = MutableLiveData<MutableList<TextInfo>>(mutableListOf())
     val textInfoList: LiveData<MutableList<TextInfo>> = _textInfoList
+
+    private val _coins = MutableLiveData<UInt>(0u) // Use LiveData to track changes
+    val coins: LiveData<UInt> = _coins
 
     private val _foodItems = MutableLiveData<MutableList<String>>(mutableListOf())
     val foodItems: MutableLiveData<MutableList<String>> = _foodItems
@@ -69,8 +76,39 @@ class MainViewModel() : ViewModel() {
         database.deleteUser(userId)
     }
 
-    fun updateUserCoins(coins: Int) {
-        database.updateUserCoins(currentUserId, coins)
+    fun updateUserCoins(newCoins: UInt) {
+        _coins.value = newCoins // Update UI immediately
+        database.updateUserCoins(currentUserId, newCoins.toInt()) // Sync with database
+    }
+
+    /** Retrieve Coins from Firebase **/
+    fun getCurrentUserCoins() {
+        getUser(currentUserId, { userData ->
+            val retrievedCoins = (userData?.get("coins") as? Number)?.toInt() ?: 0
+            _coins.value = retrievedCoins.toUInt() // Update LiveData
+            println("🪙 Coins updated: ${_coins.value}")
+        }, { error ->
+            println("Error fetching user coins: ${error.message}")
+            _coins.value = 0u // Default to 0 in case of failure
+        })
+    }
+
+    /** Add and Subtract Coins **/
+    fun addCoins(amount: Int) {
+        val newCoins = (_coins.value ?: 0u) + amount.toUInt()
+        updateUserCoins(newCoins)
+    }
+
+    fun subtractCoins(amount: Int): Boolean {
+        val currentCoins = _coins.value ?: 0u
+        return if (currentCoins.toInt() >= amount) {
+            val newCoins = currentCoins - amount.toUInt()
+            updateUserCoins(newCoins)
+            true // Successfully deducted
+        } else {
+            println("Not enough coins!") // Prevent negative coins
+            false
+        }
     }
 
     fun getUser(userId: String, onSuccess: (Map<String, Any?>?) -> Unit, onFailure: (Exception) -> Unit) {

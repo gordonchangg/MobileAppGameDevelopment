@@ -4,6 +4,10 @@ import android.os.Handler
 import android.os.Looper
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class GameScene : IScene {
     override val entities: MutableList<Entity> = mutableListOf()
@@ -18,8 +22,8 @@ class GameScene : IScene {
     val gridHeight = 6
     val gridMinX = -0.4f
     val gridMaxX = 0.4f
-    val gridMinY = 0.31f
-    val gridMaxY = -0.59f
+    val gridMinY = 0.25f
+    val gridMaxY = -0.65f
     val cellWidth = (gridMaxX - gridMinX) / gridWidth
     val cellHeight = (gridMaxY - gridMinY) / gridHeight
     val gridThickness = 0.01f
@@ -40,6 +44,7 @@ class GameScene : IScene {
     private var isDragging = false
     private var isHolding = false
     private val holdHandler = Handler(Looper.getMainLooper())
+    private var coins: UInt = 0u
 
     //send to cafe booleans
     private var sendToCafe_cake = false
@@ -80,6 +85,22 @@ class GameScene : IScene {
     override fun onSurfaceCreated() {
         val lightColor = floatArrayOf(0.984f, 0.835f, 0.588f, 1f) // F4D596 (Pale Yellow)
         val darkColor = floatArrayOf(0.859f, 0.694f, 0.475f, 1f) // DB
+
+        //button
+        cake = entityManager.createEntity(R.drawable.nrycake)
+        cake.position = floatArrayOf(-0.30f, 0.48f, 0f)
+        cake.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+        entities.add(cake)
+
+        cupcake = entityManager.createEntity(R.drawable.nrycupcake)
+        cupcake.position = floatArrayOf(-0.10f, 0.48f, 0f)
+        cupcake.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+        entities.add(cupcake)
+
+        latte = entityManager.createEntity(R.drawable.nrylatte)
+        latte.position = floatArrayOf(0.10f, 0.48f, 0f)
+        latte.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+        entities.add(latte)
 
         for (x in 0 until gridWidth) {
             for (y in 0 until gridHeight) {
@@ -131,35 +152,29 @@ class GameScene : IScene {
         toShopSceneButton.scale = floatArrayOf(0.21f, 0.21f, 0.21f)
         entities.add(toShopSceneButton)
 
-        //button
-        cake = entityManager.createEntity(R.drawable.nrycake)
-        cake.position = floatArrayOf(-0.30f, 0.48f, 0f)
-        cake.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
-        entities.add(cake)
-
-        cupcake = entityManager.createEntity(R.drawable.nrycupcake)
-        cupcake.position = floatArrayOf(-0.10f, 0.48f, 0f)
-        cupcake.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
-        entities.add(cupcake)
-
-        latte = entityManager.createEntity(R.drawable.nrylatte)
-        latte.position = floatArrayOf(0.10f, 0.48f, 0f)
-        latte.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
-        entities.add(latte)
-
-
-        coinsText = TextInfo("100")
+        // Initialize coins text
+        coinsText = TextInfo("0") // Start with 0, will be updated
         coinsText.offsetX = 150.dp
         coinsText.offsetY = (-230).dp
-
         viewModel.addTextInfo(coinsText)
-    }
 
+        // 🪙 Observe changes in coins LiveData and update UI
+        viewModel.coins.observeForever { newCoins ->
+            coinsText.text = "$newCoins" // Update text dynamically
+            println("🪙 Coins updated in GameScene: $newCoins") // Debug log
+        }
+
+        // Fetch initial coin value from Firebase
+        viewModel.getCurrentUserCoins()
+
+    }
 
     override fun onSurfaceChanged() {}
 
     override fun update() {
         entityManager.setBackgroundTexture(R.drawable.gamescreenbg)
+
+        coinsText.text = "${viewModel.coins.value ?: 0u}"  // Ensure UI reflects change
 
         //strawberrycake
         if(doesEntityExist(R.drawable.strawberrcake)){
@@ -247,11 +262,7 @@ class GameScene : IScene {
                     }
                 }
 
-                viewModel.updateUserCoins(150)
 
-                viewModel.removeTextInfo(coinsText)
-                coinsText.text = "150"
-                viewModel.addTextInfo(coinsText)
             }
 
         }
@@ -265,6 +276,16 @@ class GameScene : IScene {
                 entityX == xIndex && entityY == yIndex
             }
         }
+
+    fun addCoinsToPlayer(amount: Int) {
+        viewModel.addCoins(amount) // This updates LiveData & database
+    }
+
+    fun subtractCoinsFromPlayer(amount: Int) {
+        if (!viewModel.subtractCoins(amount)) {
+            println("Not enough coins!") // Prevents negative balance
+        }
+    }
 
         fun isCellOccupied(xIndex: Int, yIndex: Int, excludeEntity: Entity? = null): Boolean {
             val occupiedCells = entities.filter { it != excludeEntity } // Exclude dragging entity
@@ -319,9 +340,9 @@ class GameScene : IScene {
 
             holdHandler.removeCallbacks(holdRunnable) // Stop hold detection
 
+
             if (draggingEntity != null) {
                 if (!isHolding) {
-                    // ✅ If the user didn't hold, play a tap sound
                     viewModel.audioManager.playAudio(R.raw.scoop)
                 }
                 // Convert entity position to grid indices BEFORE updating position
@@ -348,6 +369,18 @@ class GameScene : IScene {
                 //spawning
                 if (!isHolding) {
                     val ingredientTexture = producerToIngredient[draggingEntity!!.textureId]
+
+//                    val hasEnoughCoins = when (draggingEntity!!.textureId) {
+//                        producer_seed -> viewModel.deductCoins(5)
+//                        producer_wheatplant -> viewModel.deductCoins(10)
+//                        producer_book -> viewModel.deductCoins(15)
+//                        else -> true // Default case (no deduction needed)
+//                    }
+
+//                    if (!hasEnoughCoins) {
+//                        // Play sound when the player does not have enough coins
+//                        viewModel.audioManager.playAudio(R.raw.shaking)
+//                    }
                     if (ingredientTexture != null) {
                         val (xIndex, yIndex) = findNextAvailableGridCellNearProducer(draggingEntity!!)
                         if (xIndex != -1 && yIndex != -1) {
@@ -355,7 +388,9 @@ class GameScene : IScene {
                             println("Ingredient spawned at ($xIndex, $yIndex)")
                         }
                     }
-                } else {
+                }
+
+                else {
 
                     if (!isCellOccupied(gridX, gridY, excludeEntity = draggingEntity)) {
                         viewModel.audioManager.playAudio(R.raw.mainmenuclick)
