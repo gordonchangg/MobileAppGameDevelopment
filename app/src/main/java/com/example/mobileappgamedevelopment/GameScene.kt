@@ -160,8 +160,11 @@ class GameScene : IScene {
 
         // 🪙 Observe changes in coins LiveData and update UI
         viewModel.coins.observeForever { newCoins ->
+            viewModel.removeTextInfo(coinsText)
             coinsText.text = "$newCoins" // Update text dynamically
             println("🪙 Coins updated in GameScene: $newCoins") // Debug log
+            viewModel.addTextInfo(coinsText)
+
         }
 
         // Fetch initial coin value from Firebase
@@ -225,7 +228,6 @@ class GameScene : IScene {
     override fun onActionDown(normalizedX: Float, normalizedY: Float) {
 
         if (toShopSceneButton.contains(normalizedX, normalizedY)) {
-
             sceneManager?.setScene(ShopScene::class, viewModel)
         } else if(sendToCafe_cake && cake.contains(normalizedX, normalizedY)){
             val deleteEntity: Entity = getEntityByTextureId(R.drawable.strawberrcake) ?: return
@@ -261,23 +263,21 @@ class GameScene : IScene {
                         return
                     }
                 }
-
-
             }
 
         }
     }
 
-        fun getEntityInCell(xIndex: Int, yIndex: Int, excludeEntity: Entity? = null): Entity? {
-            return entities.find { entity ->
-                if (entity == excludeEntity) return@find false  // Exclude the currently held entity
-                val entityX = ((entity.position[0] - gridMinX) / cellWidth).toInt()
-                val entityY = ((entity.position[1] - gridMinY) / cellHeight).toInt()
-                entityX == xIndex && entityY == yIndex
-            }
+    fun getEntityInCell(xIndex: Int, yIndex: Int, excludeEntity: Entity? = null): Entity? {
+        return entities.find { entity ->
+            if (entity == excludeEntity) return@find false  // Exclude the currently held entity
+            val entityX = ((entity.position[0] - gridMinX) / cellWidth).toInt()
+            val entityY = ((entity.position[1] - gridMinY) / cellHeight).toInt()
+            entityX == xIndex && entityY == yIndex
         }
+    }
 
-    fun addCoinsToPlayer(amount: Int) {
+    fun addCoinsToPlayer(amount: Long) {
         viewModel.addCoins(amount) // This updates LiveData & database
     }
 
@@ -287,88 +287,88 @@ class GameScene : IScene {
         }
     }
 
-        fun isCellOccupied(xIndex: Int, yIndex: Int, excludeEntity: Entity? = null): Boolean {
-            val occupiedCells = entities.filter { it != excludeEntity } // Exclude dragging entity
-                .map { entity ->
-                    val entityX = ((entity.position[0] - gridMinX) / cellWidth).toInt()
-                    val entityY = ((entity.position[1] - gridMinY) / cellHeight).toInt()
-                    entityX to entityY
-                }.toSet()
+    fun isCellOccupied(xIndex: Int, yIndex: Int, excludeEntity: Entity? = null): Boolean {
+        val occupiedCells = entities.filter { it != excludeEntity } // Exclude dragging entity
+            .map { entity ->
+                val entityX = ((entity.position[0] - gridMinX) / cellWidth).toInt()
+                val entityY = ((entity.position[1] - gridMinY) / cellHeight).toInt()
+                entityX to entityY
+            }.toSet()
 
-            println("Occupied cells (excluding current entity): $occupiedCells") // DEBUG PRINT
+        println("Occupied cells (excluding current entity): $occupiedCells") // DEBUG PRINT
 
-            return occupiedCells.contains(xIndex to yIndex)
+        return occupiedCells.contains(xIndex to yIndex)
 
+    }
+
+    override fun onActionMove(normalizedDx: Float, normalizedDy: Float) {
+        if (isDragging && draggingEntity != null) {
+            draggingEntity!!.position[0] += normalizedDx
+            draggingEntity!!.position[1] += normalizedDy
         }
+    }
 
-        override fun onActionMove(normalizedDx: Float, normalizedDy: Float) {
-            if (isDragging && draggingEntity != null) {
-                draggingEntity!!.position[0] += normalizedDx
-                draggingEntity!!.position[1] += normalizedDy
+    fun findNearestEmptyCell(
+        startX: Int,
+        startY: Int,
+        excludeEntity: Entity? = null
+    ): Pair<Int, Int> {
+        val searchOffsets = listOf(
+            Pair(0, 1), Pair(0, -1), Pair(1, 0), Pair(-1, 0), // Adjacent cells
+            Pair(1, 1), Pair(1, -1), Pair(-1, 1), Pair(-1, -1) // Diagonal cells
+        )
+
+        for ((dx, dy) in searchOffsets) {
+            val newX = startX + dx
+            val newY = startY + dy
+
+            if (newX in 0 until gridWidth && newY in 0 until gridHeight && !isCellOccupied(
+                    newX,
+                    newY,
+                    excludeEntity
+                )
+            ) {
+                return newX to newY // ✅ Found an empty spot
             }
         }
 
-        fun findNearestEmptyCell(
-            startX: Int,
-            startY: Int,
-            excludeEntity: Entity? = null
-        ): Pair<Int, Int> {
-            val searchOffsets = listOf(
-                Pair(0, 1), Pair(0, -1), Pair(1, 0), Pair(-1, 0), // Adjacent cells
-                Pair(1, 1), Pair(1, -1), Pair(-1, 1), Pair(-1, -1) // Diagonal cells
+        return -1 to -1 // 🚨 No empty space found
+    }
+
+
+    override fun onActionUp() {
+
+        holdHandler.removeCallbacks(holdRunnable) // Stop hold detection
+
+
+        if (draggingEntity != null) {
+            if (!isHolding) {
+                viewModel.audioManager.playAudio(R.raw.scoop)
+            }
+            // Convert entity position to grid indices BEFORE updating position
+            val previousX =
+                ((ori_pos[0] - gridMinX) / cellWidth).toInt().coerceIn(0, gridWidth - 1)
+            val previousY =
+                ((ori_pos[1] - gridMinY) / cellHeight).toInt().coerceIn(0, gridHeight - 1)
+
+            val gridX = ((draggingEntity!!.position[0] - gridMinX) / cellWidth).toInt()
+                .coerceIn(0, gridWidth - 1)
+            val gridY = ((draggingEntity!!.position[1] - gridMinY) / cellHeight).toInt()
+                .coerceIn(0, gridHeight - 1)
+
+            println(
+                "Trying to place entity at ($gridX, $gridY) - Occupied before update: ${
+                    isCellOccupied(
+                        gridX,
+                        gridY,
+                        excludeEntity = draggingEntity
+                    )
+                }"
             )
 
-            for ((dx, dy) in searchOffsets) {
-                val newX = startX + dx
-                val newY = startY + dy
-
-                if (newX in 0 until gridWidth && newY in 0 until gridHeight && !isCellOccupied(
-                        newX,
-                        newY,
-                        excludeEntity
-                    )
-                ) {
-                    return newX to newY // ✅ Found an empty spot
-                }
-            }
-
-            return -1 to -1 // 🚨 No empty space found
-        }
-
-
-        override fun onActionUp() {
-
-            holdHandler.removeCallbacks(holdRunnable) // Stop hold detection
-
-
-            if (draggingEntity != null) {
-                if (!isHolding) {
-                    viewModel.audioManager.playAudio(R.raw.scoop)
-                }
-                // Convert entity position to grid indices BEFORE updating position
-                val previousX =
-                    ((ori_pos[0] - gridMinX) / cellWidth).toInt().coerceIn(0, gridWidth - 1)
-                val previousY =
-                    ((ori_pos[1] - gridMinY) / cellHeight).toInt().coerceIn(0, gridHeight - 1)
-
-                val gridX = ((draggingEntity!!.position[0] - gridMinX) / cellWidth).toInt()
-                    .coerceIn(0, gridWidth - 1)
-                val gridY = ((draggingEntity!!.position[1] - gridMinY) / cellHeight).toInt()
-                    .coerceIn(0, gridHeight - 1)
-
-                println(
-                    "Trying to place entity at ($gridX, $gridY) - Occupied before update: ${
-                        isCellOccupied(
-                            gridX,
-                            gridY,
-                            excludeEntity = draggingEntity
-                        )
-                    }"
-                )
-
-                //spawning
-                if (!isHolding) {
-                    val ingredientTexture = producerToIngredient[draggingEntity!!.textureId]
+            //spawning
+            if (!isHolding) {
+                val ingredientTexture = producerToIngredient[draggingEntity!!.textureId]
 
 //                    val hasEnoughCoins = when (draggingEntity!!.textureId) {
 //                        producer_seed -> viewModel.deductCoins(5)
@@ -381,133 +381,133 @@ class GameScene : IScene {
 //                        // Play sound when the player does not have enough coins
 //                        viewModel.audioManager.playAudio(R.raw.shaking)
 //                    }
-                    if (ingredientTexture != null) {
-                        val (xIndex, yIndex) = findNextAvailableGridCellNearProducer(draggingEntity!!)
-                        if (xIndex != -1 && yIndex != -1) {
-                            addEntityToCell(xIndex, yIndex, ingredientTexture) // Spawn ingredient
-                            println("Ingredient spawned at ($xIndex, $yIndex)")
-                        }
+                if (ingredientTexture != null) {
+                    val (xIndex, yIndex) = findNextAvailableGridCellNearProducer(draggingEntity!!)
+                    if (xIndex != -1 && yIndex != -1) {
+                        addEntityToCell(xIndex, yIndex, ingredientTexture) // Spawn ingredient
+                        println("Ingredient spawned at ($xIndex, $yIndex)")
                     }
                 }
+            }
 
-                else {
+            else {
 
-                    if (!isCellOccupied(gridX, gridY, excludeEntity = draggingEntity)) {
-                        viewModel.audioManager.playAudio(R.raw.mainmenuclick)
-                        draggingEntity!!.position =
-                            getCellCenter(gridX, gridY, gridMinX, gridMinY, cellWidth, cellHeight)
-                        println("Entity placed successfully at ($gridX, $gridY)")
+                if (!isCellOccupied(gridX, gridY, excludeEntity = draggingEntity)) {
+                    viewModel.audioManager.playAudio(R.raw.mainmenuclick)
+                    draggingEntity!!.position =
+                        getCellCenter(gridX, gridY, gridMinX, gridMinY, cellWidth, cellHeight)
+                    println("Entity placed successfully at ($gridX, $gridY)")
+
+                } else {
+                    val existingEntity =
+                        getEntityInCell(gridX, gridY, excludeEntity = draggingEntity)
+                    val newTexture = getNextMergeTexture(draggingEntity!!.textureId)
+                    if (existingEntity!!.textureId == draggingEntity!!.textureId) {
+                        println("same entity")
+                        newTexture?.let {
+                            // ✅ Only update if `newTexture` is NOT null
+                            existingEntity.textureId = it
+                            viewModel.audioManager.playAudio(R.raw.shaking)
+                            println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
+
+                            // ✅ Delete the second entity off-screen
+                            deleteEntity(draggingEntity!!)
+                            println("Dragged entity deleted after merging.")
+                        } ?: run {
+                            println("No further upgrades available.")
+
+                            // Search for the nearest available cell, excluding the dragging entity itself
+                            val (newX, newY) = findNearestEmptyCell(
+                                gridX,
+                                gridY,
+                                excludeEntity = draggingEntity
+                            )
+
+                            if (newX != -1 && newY != -1) {
+                                draggingEntity!!.position =
+                                    getCellCenter(
+                                        newX,
+                                        newY,
+                                        gridMinX,
+                                        gridMinY,
+                                        cellWidth,
+                                        cellHeight
+                                    )
+
+                                println("Cell occupied! Moved entity to nearest empty cell ($newX, $newY)")
+                            } else {
+                                draggingEntity!!.position = ori_pos.copyOf()
+                                println("No empty cells nearby! Returning entity to original position ($previousX, $previousY).")
+                            }
+                        }
 
                     } else {
+
+                        //some special merges
                         val existingEntity =
                             getEntityInCell(gridX, gridY, excludeEntity = draggingEntity)
-                        val newTexture = getNextMergeTexture(draggingEntity!!.textureId)
-                        if (existingEntity!!.textureId == draggingEntity!!.textureId) {
-                            println("same entity")
-                            newTexture?.let {
-                                // ✅ Only update if `newTexture` is NOT null
-                                existingEntity.textureId = it
-                                viewModel.audioManager.playAudio(R.raw.shaking)
-                                println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
+                        val pair = setOf(existingEntity!!.textureId, draggingEntity!!.textureId)
 
-                                // ✅ Delete the second entity off-screen
-                                deleteEntity(draggingEntity!!)
-                                println("Dragged entity deleted after merging.")
-                            } ?: run {
-                                println("No further upgrades available.")
+                        if (pair == setOf(R.drawable.strawberry, R.drawable.sponge)) {
+                            existingEntity.textureId = R.drawable.strawberrcake
 
-                                // Search for the nearest available cell, excluding the dragging entity itself
-                                val (newX, newY) = findNearestEmptyCell(
-                                    gridX,
-                                    gridY,
-                                    excludeEntity = draggingEntity
-                                )
+                            println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
 
-                                if (newX != -1 && newY != -1) {
-                                    draggingEntity!!.position =
-                                        getCellCenter(
-                                            newX,
-                                            newY,
-                                            gridMinX,
-                                            gridMinY,
-                                            cellWidth,
-                                            cellHeight
-                                        )
+                            // ✅ Delete the second entity off-screen
+                            deleteEntity(draggingEntity!!)
+                            println("Dragged entity deleted after merging.")
+                        } else if (pair == setOf(R.drawable.wrapper, R.drawable.cupcake)) {
+                            existingEntity.textureId = R.drawable.cupcake
 
-                                    println("Cell occupied! Moved entity to nearest empty cell ($newX, $newY)")
-                                } else {
-                                    draggingEntity!!.position = ori_pos.copyOf()
-                                    println("No empty cells nearby! Returning entity to original position ($previousX, $previousY).")
-                                }
-                            }
+                            println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
 
+                            // ✅ Delete the second entity off-screen
+                            deleteEntity(draggingEntity!!)
+                            println("Dragged entity deleted after merging.")
+                        } else if (pair == setOf(R.drawable.vanilla, R.drawable.cup)) {
+                            //change in the future
+                            existingEntity.textureId = R.drawable.latte
+
+                            println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
+
+                            // ✅ Delete the second entity off-screen
+                            deleteEntity(draggingEntity!!)
+                            println("Dragged entity deleted after merging.")
                         } else {
+                            // Search for the nearest available cell, excluding the dragging entity itself
+                            val (newX, newY) = findNearestEmptyCell(
+                                gridX,
+                                gridY,
+                                excludeEntity = draggingEntity
+                            )
 
-                            //some special merges
-                            val existingEntity =
-                                getEntityInCell(gridX, gridY, excludeEntity = draggingEntity)
-                            val pair = setOf(existingEntity!!.textureId, draggingEntity!!.textureId)
-
-                            if (pair == setOf(R.drawable.strawberry, R.drawable.sponge)) {
-                                existingEntity.textureId = R.drawable.strawberrcake
-
-                                println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
-
-                                // ✅ Delete the second entity off-screen
-                                deleteEntity(draggingEntity!!)
-                                println("Dragged entity deleted after merging.")
-                            } else if (pair == setOf(R.drawable.wrapper, R.drawable.cupcake)) {
-                                existingEntity.textureId = R.drawable.cupcake
-
-                                println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
-
-                                // ✅ Delete the second entity off-screen
-                                deleteEntity(draggingEntity!!)
-                                println("Dragged entity deleted after merging.")
-                            } else if (pair == setOf(R.drawable.vanilla, R.drawable.cup)) {
-                                //change in the future
-                                existingEntity.textureId = R.drawable.latte
-
-                                println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
-
-                                // ✅ Delete the second entity off-screen
-                                deleteEntity(draggingEntity!!)
-                                println("Dragged entity deleted after merging.")
+                            if (newX != -1 && newY != -1) {
+                                draggingEntity!!.position =
+                                    getCellCenter(
+                                        newX,
+                                        newY,
+                                        gridMinX,
+                                        gridMinY,
+                                        cellWidth,
+                                        cellHeight
+                                    )
+                                viewModel.audioManager.playAudio(R.raw.scoop2)
+                                println("Cell occupied! Moved entity to nearest empty cell ($newX, $newY)")
                             } else {
-                                // Search for the nearest available cell, excluding the dragging entity itself
-                                val (newX, newY) = findNearestEmptyCell(
-                                    gridX,
-                                    gridY,
-                                    excludeEntity = draggingEntity
-                                )
-
-                                if (newX != -1 && newY != -1) {
-                                    draggingEntity!!.position =
-                                        getCellCenter(
-                                            newX,
-                                            newY,
-                                            gridMinX,
-                                            gridMinY,
-                                            cellWidth,
-                                            cellHeight
-                                        )
-                                    viewModel.audioManager.playAudio(R.raw.scoop2)
-                                    println("Cell occupied! Moved entity to nearest empty cell ($newX, $newY)")
-                                } else {
-                                    draggingEntity!!.position = ori_pos.copyOf()
-                                    println("No empty cells nearby! Returning entity to original position ($previousX, $previousY).")
-                                }
+                                draggingEntity!!.position = ori_pos.copyOf()
+                                println("No empty cells nearby! Returning entity to original position ($previousX, $previousY).")
                             }
                         }
                     }
                 }
             }
-
-            // Reset states
-            draggingEntity = null
-            isDragging = false
-            isHolding = false
         }
+
+        // Reset states
+        draggingEntity = null
+        isDragging = false
+        isHolding = false
+    }
 
 
     fun getMergeKey(currentTexture: Int): Int? {

@@ -28,8 +28,8 @@ class MainViewModel() : ViewModel() {
     private val _textInfoList = MutableLiveData<MutableList<TextInfo>>(mutableListOf())
     val textInfoList: LiveData<MutableList<TextInfo>> = _textInfoList
 
-    private val _coins = MutableLiveData<UInt>(0u) // Use LiveData to track changes
-    val coins: LiveData<UInt> = _coins
+    private val _coins = MutableLiveData<Long>(0) // Use LiveData to track changes
+    val coins: LiveData<Long> = _coins
 
     private val _foodItems = MutableLiveData<MutableList<String>>(mutableListOf())
     val foodItems: MutableLiveData<MutableList<String>> = _foodItems
@@ -76,7 +76,7 @@ class MainViewModel() : ViewModel() {
         database.deleteUser(userId)
     }
 
-    fun updateUserCoins(newCoins: UInt) {
+    fun updateUserCoins(newCoins: Long) {
         _coins.value = newCoins // Update UI immediately
         database.updateUserCoins(currentUserId, newCoins.toInt()) // Sync with database
     }
@@ -85,24 +85,24 @@ class MainViewModel() : ViewModel() {
     fun getCurrentUserCoins() {
         getUser(currentUserId, { userData ->
             val retrievedCoins = (userData?.get("coins") as? Number)?.toInt() ?: 0
-            _coins.value = retrievedCoins.toUInt() // Update LiveData
+            _coins.value = retrievedCoins.toLong() // Update LiveData
             println("🪙 Coins updated: ${_coins.value}")
         }, { error ->
             println("Error fetching user coins: ${error.message}")
-            _coins.value = 0u // Default to 0 in case of failure
+            _coins.value = 0 // Default to 0 in case of failure
         })
     }
 
     /** Add and Subtract Coins **/
-    fun addCoins(amount: Int) {
-        val newCoins = (_coins.value ?: 0u) + amount.toUInt()
+    fun addCoins(amount: Long) {
+        val newCoins = (_coins.value ?: 0) + amount.toLong()
         updateUserCoins(newCoins)
     }
 
     fun subtractCoins(amount: Int): Boolean {
-        val currentCoins = _coins.value ?: 0u
-        return if (currentCoins.toInt() >= amount) {
-            val newCoins = currentCoins - amount.toUInt()
+        val currentCoins = _coins.value ?: 0
+        return if (currentCoins >= amount) {
+            val newCoins = currentCoins - amount.toLong()
             updateUserCoins(newCoins)
             true // Successfully deducted
         } else {
