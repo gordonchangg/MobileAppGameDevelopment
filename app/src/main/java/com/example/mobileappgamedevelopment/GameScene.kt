@@ -2,12 +2,7 @@ package com.example.mobileappgamedevelopment
 
 import android.os.Handler
 import android.os.Looper
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class GameScene : IScene {
     override val entities: MutableList<Entity> = mutableListOf()
@@ -98,7 +93,7 @@ class GameScene : IScene {
         // Initialize coins text
         coinsText = TextInfo("0") // Start with 0, will be updated
         coinsText.offsetX = 160.dp
-        coinsText.offsetY = (-140).dp
+        coinsText.offsetY = (-143).dp
         viewModel.addTextInfo(coinsText)
 
         coinIcon = entityManager.createEntity(R.drawable.coin)

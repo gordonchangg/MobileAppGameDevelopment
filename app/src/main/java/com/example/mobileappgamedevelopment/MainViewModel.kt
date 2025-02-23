@@ -1,21 +1,10 @@
 package com.example.mobileappgamedevelopment
 
-import android.content.Context
-import androidx.compose.ui.geometry.Offset
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import coil3.Bitmap
-import com.google.firebase.database.ValueEventListener
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
 import java.io.File
-import java.util.concurrent.ConcurrentLinkedQueue
 
 
 class MainViewModel() : ViewModel() {
@@ -34,20 +23,35 @@ class MainViewModel() : ViewModel() {
     private val _foodItems = MutableLiveData<MutableList<String>>(mutableListOf())
     val foodItems: MutableLiveData<MutableList<String>> = _foodItems
 
+    private val _foodItemCounts = MutableLiveData<Map<String, Int>>(mapOf(
+        "cake" to 0,
+        "cupcake" to 0,
+        "latte" to 0
+    ))
+    val foodItemCounts: LiveData<Map<String, Int>> = _foodItemCounts
+
     fun addTextInfo(textInfo: TextInfo) {
         val currentList = _textInfoList.value?.toMutableList() ?: mutableListOf()
         currentList.add(textInfo)
-        _textInfoList.value = currentList
+        _textInfoList.postValue(currentList)
     }
 
     fun isFoodItemExists(food: String): Boolean {
         return _foodItems.value?.contains(food) == true
     }
 
+    fun getFoodItemCount(food: String): Int {
+        return _foodItemCounts.value?.get(food) ?: 0
+    }
+
     fun addFoodItem(food: String) {
         val currentList = _foodItems.value ?: mutableListOf()
         currentList.add(food)
         _foodItems.value = currentList
+
+        _foodItemCounts.value = _foodItemCounts.value?.toMutableMap()?.apply {
+            this[food] = (this[food] ?: 0) + 1
+        }
     }
 
     fun removeFoodItem(food: String) {
@@ -56,8 +60,23 @@ class MainViewModel() : ViewModel() {
         _foodItems.value = currentList
     }
 
+    fun decreaseFoodCount(food: String) {
+        _foodItemCounts.value = _foodItemCounts.value?.toMutableMap()?.apply {
+            val currentCount = this[food] ?: 0
+            if (currentCount > 0) {
+                this[food] = currentCount - 1
+            }
+        }
+    }
+
     fun clearFoodItems() {
         _foodItems.value = mutableListOf()
+
+        _foodItemCounts.value = mapOf(
+            "cake" to 0,
+            "cupcake" to 0,
+            "latte" to 0
+        )
     }
 
     fun removeTextInfo(textInfo: TextInfo) {
