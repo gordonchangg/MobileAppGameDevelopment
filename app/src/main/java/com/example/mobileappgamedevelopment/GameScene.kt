@@ -81,7 +81,7 @@ class GameScene : IScene {
     private val mergeChains = mapOf(
         R.drawable.seed to listOf(R.drawable.seed,R.drawable.plant, R.drawable.strawberry, R.drawable.chocolate, R.drawable.vanilla),
         R.drawable.paper to listOf(R.drawable.paper,R.drawable.stackofpaper, R.drawable.plastic, R.drawable.wrapper, R.drawable.cup ),
-        R.drawable.wheat to listOf(R.drawable.wheat,R.drawable.stackfowheat, R.drawable.flour, R.drawable.sponge, R.drawable.cupcake)
+        R.drawable.wheat to listOf(R.drawable.wheat,R.drawable.stackfowheat, R.drawable.flour, R.drawable.sponge, R.drawable.muffin)
     )
 
     override fun onSurfaceCreated() {
@@ -174,9 +174,9 @@ class GameScene : IScene {
             toShopSceneButton.scale = floatArrayOf(0.21f, 0.21f, 0.21f)
             entities.add(toShopSceneButton)
 
-        recipebook = entityManager.createEntity(R.drawable.recipe)
+        recipebook = entityManager.createEntity(R.drawable.recipebook)
         recipebook.position = floatArrayOf(-1.0f, -1.0f, 0f)
-        recipebook.scale = floatArrayOf(0.3f, 0.3f, 0.3f)
+        recipebook.scale = floatArrayOf(0.92f, 1.2f, 0.8f)
         entities.add(recipebook)
 
             // 🪙 Observe changes in coins LiveData and update UI
@@ -187,7 +187,10 @@ class GameScene : IScene {
                 viewModel.addTextInfo(coinsText)
 
             }
-
+        recipebook = entityManager.createEntity(R.drawable.recipebook)
+        recipebook.position = floatArrayOf(-1.0f, -1.0f, 0f)
+        recipebook.scale = floatArrayOf(0.92f, 1.2f, 0.8f)
+        entities.add(recipebook)
             // Fetch initial coin value from Firebase
             viewModel.getCurrentUserCoins()
 
@@ -231,6 +234,15 @@ class GameScene : IScene {
             latte.textureId = R.drawable.nrylatte
             latte.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
 
+        }
+        if(viewModel.isFoodItemExists("cake")){
+            cake.textureId = R.drawable.fullcake
+        }
+        if(viewModel.isFoodItemExists("cupcake")){
+            cupcake.textureId = R.drawable.fullcupcake
+        }
+        if(viewModel.isFoodItemExists("latte")){
+            latte.textureId = R.drawable.fulllatte
         }
     }
 
@@ -493,7 +505,7 @@ class GameScene : IScene {
                             // ✅ Delete the second entity off-screen
                             deleteEntity(draggingEntity!!)
                             println("Dragged entity deleted after merging.")
-                        } else if (pair == setOf(R.drawable.wrapper, R.drawable.cupcake)) {
+                        } else if (pair == setOf(R.drawable.wrapper, R.drawable.muffin)) {
                             existingEntity.textureId = R.drawable.cupcake
 
                             println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
