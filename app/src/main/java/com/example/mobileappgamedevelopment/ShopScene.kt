@@ -142,6 +142,8 @@ class ShopScene : IScene {
 
         //food item count
 //        cakeCount = TextInfo("0") // Start with 0, will be updated
+//        cakeCount.offsetX = 160.dp
+//        cakeCount.offsetY = (-143).dp
 //        viewModel.addTextInfo(cakeCount)
 
         // Initialize coins text
@@ -206,9 +208,6 @@ class ShopScene : IScene {
             customer.userData["selectedFood"] = selectedFood
             val foodItem = customer.userData["selectedFood"] as String
 
-            // Decrease the stock of the selected food item
-            viewModel.decreaseFoodCount(foodItem)
-
             customerQueue.addLast(customer)
 
             // Assign a path to the customer (to the table)
@@ -225,12 +224,18 @@ class ShopScene : IScene {
                 // Check if customer is at food area (path[2])
                 val offset = 0.05f
                 if (Math.abs(customer.position[0] - path[2][0]) < offset && Math.abs(customer.position[1] - path[2][1]) < offset) {
-                    if (viewModel.isFoodItemExists(foodItem)) {
+                    if (viewModel.getFoodItemCount(foodItem) != 0) {
+                        // Decrease the stock of the selected food item
+                        viewModel.decreaseFoodCount(foodItem)
+
+                        // Remove food item from list if 0
+                        if (viewModel.getFoodItemCount(foodItem) == 0) {
+                            viewModel.removeFoodItem(foodItem)
+                        }
+
                         // Add money for food purchase
                         viewModel.addCoins(5) // Add money for the customer buying food
                         coinsText.text = "${viewModel.coins.value ?: 0u}" // Update coin display
-                        viewModel.removeFoodItem(foodItem)
-                        println("$foodItem selected, quantity decreased")
 
                         // Move to table after collecting food
                         moveEntityAlongPath(customer, assignedPath, null)
@@ -307,21 +312,21 @@ class ShopScene : IScene {
         if(viewModel.isFoodItemExists("cake")){
             cake.position = floatArrayOf(-0.325f, 0.45f, 0f)
         }
-        else {
+        else if (viewModel.getFoodItemCount("cake") == 0){
             cake.position = floatArrayOf(-10f, -10f, 0f)
         }
 
         if(viewModel.isFoodItemExists("cupcake")){
             cupcake.position = floatArrayOf(-0.155f, 0.435f, 0f)
         }
-        else {
+        else if (viewModel.getFoodItemCount("cupcake") == 0){
             cupcake.position = floatArrayOf(-10f, -10f, 0f)
         }
 
         if(viewModel.isFoodItemExists("latte")){
             latte.position = floatArrayOf(0.03f, 0.445f, 0f)
         }
-        else {
+        else if (viewModel.getFoodItemCount("latte") == 0){
             latte.position = floatArrayOf(-10f, -10f, 0f)
         }
 

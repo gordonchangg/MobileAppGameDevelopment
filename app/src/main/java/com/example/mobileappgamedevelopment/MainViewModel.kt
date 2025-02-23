@@ -1,7 +1,5 @@
 package com.example.mobileappgamedevelopment
 
-import android.content.Context
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.lifecycle.LiveData
@@ -55,9 +53,18 @@ class MainViewModel() : ViewModel() {
         currentList.add(food)
         _foodItems.value = currentList
 
-        _foodItemCounts.value = _foodItemCounts.value?.toMutableMap()?.apply {
-            this[food] = (this[food] ?: 0) + 1
+        val quantityToAdd = when (food) {
+            "cake" -> 5
+            "cupcake" -> 10
+            "latte" -> 15
+            else -> 1
         }
+
+        _foodItemCounts.value = _foodItemCounts.value?.toMutableMap()?.apply {
+            this[food] = (this[food] ?: 0) + quantityToAdd
+        }
+
+        println("added ${quantityToAdd} ${food}! current ${food} count = ${getFoodItemCount(food)}")
     }
 
     fun removeFoodItem(food: String) {
@@ -71,6 +78,7 @@ class MainViewModel() : ViewModel() {
             val currentCount = this[food] ?: 0
             if (currentCount > 0) {
                 this[food] = currentCount - 1
+                println("removed 1 ${food}! current ${food} count = ${getFoodItemCount(food)}")
             }
         }
     }
@@ -122,6 +130,7 @@ class MainViewModel() : ViewModel() {
     fun addCoins(amount: Long) {
         val newCoins = (_coins.value ?: 0) + amount.toLong()
         updateUserCoins(newCoins)
+        println("added $amount coins")
     }
 
     fun subtractCoins(amount: Int): Boolean {
