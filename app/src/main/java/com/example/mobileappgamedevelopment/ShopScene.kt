@@ -11,6 +11,7 @@ import coil3.Bitmap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class ShopScene : IScene {
@@ -20,13 +21,24 @@ class ShopScene : IScene {
     override val lines: MutableList<LineInfo> = mutableListOf()
     override lateinit var viewModel: MainViewModel
 
+    private val customerQueue: ArrayDeque<Entity> = ArrayDeque()
+    private val customerTableMap = mutableMapOf<Entity, FloatArray>()
+    private val maxCustomers = 4
+    private var spawnIndex = 0
+
     private val path = listOf(
-        floatArrayOf(0.3f, 0.45f, 0f),
-        floatArrayOf(0.3f, 0.25f, 0f),
-        floatArrayOf(-0.13f, 0.25f, 0f),
-//        floatArrayOf(0.4f, -0.8f, 0f),
-//        floatArrayOf(-0.4f, -0.8f, 0f)
+        floatArrayOf(0.3f, 0.45f, 0f), // door
+        floatArrayOf(0.3f, 0.25f, 0f), // in front of door
+
     )
+
+    private val tablePos  = listOf (
+        floatArrayOf(-0.35f, -0.1f, 0f), // table 1
+        floatArrayOf(0.35f, -0.1f, 0f), // table 2
+        floatArrayOf(-0.35f, -0.5f, 0f), // table 3
+        floatArrayOf(0.35f, -0.5f, 0f), // table 4
+    )
+
 
     lateinit var toGameSceneButton: Entity
     lateinit var table: Entity
@@ -37,6 +49,9 @@ class ShopScene : IScene {
     lateinit var latte: Entity
 
     override fun onSurfaceCreated() {
+
+        startCustomerSpawner()
+
         //plate
         plate  =entityManager.createEntity(R.drawable.plate)
         plate.position = floatArrayOf(-0.33f, 0.41f, 0f)
@@ -53,7 +68,7 @@ class ShopScene : IScene {
         plate.scale = floatArrayOf(0.15f, 0.1f, 0.1f)
         entities.add(plate)
 
-        repeat(1) { index ->
+        /*repeat(1) { index ->
             val entity = entityManager.createEntity(R.drawable.placeholder_customer)
             entity.position = floatArrayOf(-0.8f, 0.8f, 0f)
             entity.scale = floatArrayOf(0.2f, 0.2f, 1f)
@@ -61,7 +76,7 @@ class ShopScene : IScene {
             entity.userData["progress"] = 0f
             entity.userData["speed"] = 0.5f
             entities.add(entity)
-        }
+        }*/
 
         toGameSceneButton = entityManager.createEntity(R.drawable.bakery)
         toGameSceneButton.position = floatArrayOf(0.3f, -0.87f, 0f)
@@ -110,6 +125,71 @@ class ShopScene : IScene {
 
     override fun onSurfaceChanged() {
 
+    }
+
+    private fun startCustomerSpawner() {
+        CoroutineScope(Dispatchers.Main).launch {
+            while (true) {
+                spawnCustomer()
+                delay(3000) // Spawn every 3 seconds
+            }
+        }
+    }
+
+    private fun spawnCustomer() {
+        val customer = entityManager.createEntity(R.drawable.placeholder_customer)
+        customer.position = path[0] // Start at entry point
+        customer.scale = floatArrayOf(0.2f, 0.2f, 1f)
+
+        if (customerQueue.size >= maxCustomers) {
+            // Remove first customer from queue
+            val leavingCustomer = customerQueue.removeFirst()
+            val leavingTablePos = customerTableMap[leavingCustomer] ?: tablePos[0] // Get their original table position
+            val leavingPath = listOf(leavingTablePos, path[1], path[0])
+
+            CoroutineScope(Dispatchers.Main).launch {
+                moveEntityAlongPath(leavingCustomer, leavingPath) {
+                    entities.remove(leavingCustomer) // Remove from scene after leaving
+                    customerTableMap.remove(leavingCustomer) // Clean up the mapping
+                }
+            }
+        }
+
+        // Assign a table position dynamically
+        val tableIndex = spawnIndex % maxCustomers
+        val assignedTablePos = tablePos[tableIndex]
+        customerTableMap[customer] = assignedTablePos // Store the table position for this customer
+
+        val destinationPath = listOf(path[0], path[1], assignedTablePos)
+
+        customerQueue.addLast(customer)
+        spawnIndex++
+
+        entities.add(customer)
+
+        // Move the customer to their table
+        CoroutineScope(Dispatchers.Main).launch {
+            moveEntityAlongPath(customer, destinationPath, null)
+        }
+    }
+
+    private suspend fun moveEntityAlongPath(entity: Entity, path: List<FloatArray>, onComplete: (() -> Unit)?) {
+        for (i in 0 until path.size - 1) {
+            val start = path[i]
+            val end = path[i + 1]
+            val duration = 1.5f
+            var t = 0f
+
+            while (t < 1f) {
+                delay(16) // Approx. 60 FPS
+                t += 0.0167f * (1 / duration)
+                entity.position = interpolate(start, end, t)
+            }
+
+            entity.position = end
+        }
+
+        onComplete?.invoke()
     }
 
     private fun interpolate(start: FloatArray, end: FloatArray, t: Float): FloatArray {
