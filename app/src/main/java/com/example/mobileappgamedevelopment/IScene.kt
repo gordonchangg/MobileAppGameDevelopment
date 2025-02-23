@@ -10,6 +10,8 @@ interface IScene {
 
     val lines: MutableList<LineInfo>
     fun onSurfaceCreated()
+
+    fun onEnter()
     fun onSurfaceChanged()
     fun update()
 
@@ -52,6 +54,8 @@ class SceneManager(private val entityManager: EntityManager){
         if (isNewScene) {
             currentScene?.onSurfaceCreated()
         }
+
+        currentScene?.onEnter()
     }
 
     fun  onSurfaceChanged(){
