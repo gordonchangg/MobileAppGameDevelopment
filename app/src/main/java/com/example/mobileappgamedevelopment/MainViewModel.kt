@@ -80,7 +80,7 @@ class MainViewModel() : ViewModel() {
     }
 
     fun removeTextInfo(textInfo: TextInfo) {
-        val currentList = _textInfoList.value ?: mutableListOf()
+        val currentList = _textInfoList.value?.toMutableList() ?: mutableListOf()
         currentList.remove(textInfo)
         _textInfoList.value = currentList
     }

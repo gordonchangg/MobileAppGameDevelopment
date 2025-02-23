@@ -166,6 +166,14 @@ class ShopScene : IScene {
         }
     }
 
+    override fun onEnter() {
+        Handler(Looper.getMainLooper()).post {
+            viewModel.removeTextInfo(coinsText)
+            viewModel.addTextInfo(coinsText)
+        }
+
+    }
+
     override fun onSurfaceChanged() {
 
     }

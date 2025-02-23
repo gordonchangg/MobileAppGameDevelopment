@@ -62,6 +62,8 @@ class GameScene : IScene {
     lateinit var recipeIcon: Entity
     lateinit var recipebook: Entity
 
+    private var inScene = false
+
     // Producers
     val producer_seed = R.drawable.seedpack
     val producer_wheatplant = R.drawable.wheatplant
@@ -80,9 +82,8 @@ class GameScene : IScene {
     )
 
     override fun onSurfaceCreated() {
-            val lightColor = floatArrayOf(0.984f, 0.835f, 0.588f, 1f) // F4D596 (Pale Yellow)
-            val darkColor = floatArrayOf(0.859f, 0.694f, 0.475f, 1f) // DB
-
+        val lightColor = floatArrayOf(0.984f, 0.835f, 0.588f, 1f) // F4D596 (Pale Yellow)
+        val darkColor = floatArrayOf(0.859f, 0.694f, 0.475f, 1f) // DB
 
         //button
         cake = entityManager.createEntity(R.drawable.nrycake)
@@ -101,94 +102,100 @@ class GameScene : IScene {
         coinIcon.scale = floatArrayOf(0.07f, 0.07f, 0.07f)
         entities.add(coinIcon)
 
+        cupcake = entityManager.createEntity(R.drawable.nrycupcake)
+        cupcake.position = floatArrayOf(-0.10f, 0.48f, 0f)
+        cupcake.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+        entities.add(cupcake)
+
+        latte = entityManager.createEntity(R.drawable.nrylatte)
+        latte.position = floatArrayOf(0.10f, 0.48f, 0f)
+        latte.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+        entities.add(latte)
+
+        recipeIcon = entityManager.createEntity(R.drawable.recipe)
+        recipeIcon.position = floatArrayOf(0.095f, -0.87f, 0f)
+        recipeIcon.scale = floatArrayOf(0.186f, 0.186f, 0.19f)
+        entities.add(recipeIcon)
 
 
-            cupcake = entityManager.createEntity(R.drawable.nrycupcake)
-            cupcake.position = floatArrayOf(-0.10f, 0.48f, 0f)
-            cupcake.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
-            entities.add(cupcake)
+        for (x in 0 until gridWidth) {
+            for (y in 0 until gridHeight) {
+                val color = if ((x + y) % 2 == 0) lightColor else darkColor
 
-            latte = entityManager.createEntity(R.drawable.nrylatte)
-            latte.position = floatArrayOf(0.10f, 0.48f, 0f)
-            latte.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
-            entities.add(latte)
+                // Calculate the center position of the square
+                val centerX = gridMinX + x * cellWidth + cellWidth / 2
+                val centerY = gridMinY + y * cellHeight + cellHeight / 2
 
-            recipeIcon = entityManager.createEntity(R.drawable.recipe)
-            recipeIcon.position = floatArrayOf(0.095f, -0.87f, 0f)
-            recipeIcon.scale = floatArrayOf(0.186f, 0.186f, 0.19f)
-            entities.add(recipeIcon)
+                // Use thick lines to fill the cell
+                val thicknessX = cellWidth * 0.95f // Almost full width
+                val thicknessY = cellHeight * 0.95f // Almost full height
 
-
-            for (x in 0 until gridWidth) {
-                for (y in 0 until gridHeight) {
-                    val color = if ((x + y) % 2 == 0) lightColor else darkColor
-
-                    // Calculate the center position of the square
-                    val centerX = gridMinX + x * cellWidth + cellWidth / 2
-                    val centerY = gridMinY + y * cellHeight + cellHeight / 2
-
-                    // Use thick lines to fill the cell
-                    val thicknessX = cellWidth * 0.95f // Almost full width
-                    val thicknessY = cellHeight * 0.95f // Almost full height
-
-                    // Create filled rectangles using horizontal and vertical thick lines
-                    lines.add(LineInfo(floatArrayOf(centerX - cellWidth / 2, centerY, 0f), floatArrayOf(centerX + cellWidth / 2, centerY, 0f), thicknessY, color))
-                    lines.add(LineInfo(floatArrayOf(centerX, centerY - cellHeight / 2, 0f), floatArrayOf(centerX, centerY + cellHeight / 2, 0f), thicknessX, color))
-                }
+                // Create filled rectangles using horizontal and vertical thick lines
+                lines.add(LineInfo(floatArrayOf(centerX - cellWidth / 2, centerY, 0f), floatArrayOf(centerX + cellWidth / 2, centerY, 0f), thicknessY, color))
+                lines.add(LineInfo(floatArrayOf(centerX, centerY - cellHeight / 2, 0f), floatArrayOf(centerX, centerY + cellHeight / 2, 0f), thicknessX, color))
             }
+        }
 
-            // Draw grid lines on top
-            for (i in 0..gridHeight) {
-                val y = gridMinY + i * cellHeight
-                val start = floatArrayOf(gridMinX, y, 0f)
-                val end = floatArrayOf(gridMaxX, y, 0f)
-                lines.add(LineInfo(start, end, gridThickness, gridColor))
-            }
+        // Draw grid lines on top
+        for (i in 0..gridHeight) {
+            val y = gridMinY + i * cellHeight
+            val start = floatArrayOf(gridMinX, y, 0f)
+            val end = floatArrayOf(gridMaxX, y, 0f)
+            lines.add(LineInfo(start, end, gridThickness, gridColor))
+        }
 
-            for (i in 0..gridWidth) {
-                val x = gridMinX + i * cellWidth
-                val start = floatArrayOf(x, gridMinY, 0f)
-                val end = floatArrayOf(x, gridMaxY, 0f)
-                lines.add(LineInfo(start, end, gridThickness, gridColor))
-            }
+        for (i in 0..gridWidth) {
+            val x = gridMinX + i * cellWidth
+            val start = floatArrayOf(x, gridMinY, 0f)
+            val end = floatArrayOf(x, gridMaxY, 0f)
+            lines.add(LineInfo(start, end, gridThickness, gridColor))
+        }
 
-            // Add game entities
-            addEntityToCell(2, 3, producer_book)
-            addEntityToCell(5, 5, producer_seed)
-            addEntityToCell(3, 5, producer_wheatplant)
+        // Add game entities
+        addEntityToCell(2, 3, producer_book)
+        addEntityToCell(5, 5, producer_seed)
+        addEntityToCell(3, 5, producer_wheatplant)
 
 
-            //testing========================================
-            addEntityToCell(4, 5, R.drawable.strawberrcake)
-            addEntityToCell(0, 1, R.drawable.cupcake)
-            addEntityToCell(0, 2, R.drawable.latte)
-            //==================================================
+        //testing========================================
+        addEntityToCell(4, 5, R.drawable.strawberrcake)
+        addEntityToCell(0, 1, R.drawable.cupcake)
+        addEntityToCell(0, 2, R.drawable.latte)
+        //==================================================
 
-            toShopSceneButton = entityManager.createEntity(R.drawable.shopicon)
-            toShopSceneButton.position = floatArrayOf(0.3f, -0.87f, 0f)
-            toShopSceneButton.scale = floatArrayOf(0.21f, 0.21f, 0.21f)
-            entities.add(toShopSceneButton)
+        toShopSceneButton = entityManager.createEntity(R.drawable.shopicon)
+        toShopSceneButton.position = floatArrayOf(0.3f, -0.87f, 0f)
+        toShopSceneButton.scale = floatArrayOf(0.21f, 0.21f, 0.21f)
+        entities.add(toShopSceneButton)
 
         recipebook = entityManager.createEntity(R.drawable.recipebook)
         recipebook.position = floatArrayOf(-1.0f, -1.0f, 0f)
         recipebook.scale = floatArrayOf(0.92f, 1.2f, 0.8f)
         entities.add(recipebook)
 
-            // 🪙 Observe changes in coins LiveData and update UI
-            viewModel.coins.observeForever { newCoins ->
+        // 🪙 Observe changes in coins LiveData and update UI
+        viewModel.coins.observeForever { newCoins ->
+            if(inScene) {
                 viewModel.removeTextInfo(coinsText)
                 coinsText.text = "$newCoins" // Update text dynamically
                 println("🪙 Coins updated in GameScene: $newCoins") // Debug log
                 viewModel.addTextInfo(coinsText)
-
             }
+        }
+
         recipebook = entityManager.createEntity(R.drawable.recipebook)
         recipebook.position = floatArrayOf(-1.0f, -1.0f, 0f)
         recipebook.scale = floatArrayOf(0.92f, 1.2f, 0.8f)
         entities.add(recipebook)
-            // Fetch initial coin value from Firebase
-            viewModel.getCurrentUserCoins()
+        // Fetch initial coin value from Firebase
+        viewModel.getCurrentUserCoins()
+    }
 
+    override fun onEnter() {
+        inScene = true
+
+        viewModel.removeTextInfo(coinsText)
+        viewModel.addTextInfo(coinsText)
     }
 
     override fun onSurfaceChanged() {}
@@ -257,6 +264,7 @@ class GameScene : IScene {
 
         if (toShopSceneButton.contains(normalizedX, normalizedY)) {
             viewModel.removeTextInfo(coinsText)
+            inScene = false;
             sceneManager?.setScene(ShopScene::class, viewModel)
         }
         else if (recipeIcon.contains(normalizedX, normalizedY)) {
