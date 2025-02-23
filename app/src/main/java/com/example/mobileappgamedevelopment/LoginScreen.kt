@@ -1,5 +1,6 @@
 package com.example.mobileappgamedevelopment
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,9 +8,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,8 +25,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.fontResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,25 +48,41 @@ fun LoginScreen(
 
     val auth = FirebaseAuth.getInstance()
 
+    val coinyFont = FontFamily(
+        Font(R.font.coiny)
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
+        // Background Image
+        Image(
+            painter = painterResource(id = R.drawable.loginpage),
+            contentDescription = "Background Image",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop // Adjusts image scaling
+        )
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .padding(16.dp)
                 .width(IntrinsicSize.Min)
+                .align(Alignment.Center) // Start from center
+                .offset(y = 150.dp) // Move it downward
         ) {
-            // Title
-            Text(
-                text = "Login",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
+                Text(
+                    text = "Login",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontFamily = coinyFont,
+                    ),
+                    color = Color(0xFF895349)
+                )
+
 
             // Username Input Field
             TextField(
@@ -65,8 +92,8 @@ fun LoginScreen(
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                    focusedContainerColor = Color(0xFFFEF9E5),
+                    unfocusedContainerColor = Color(0xFFFEF9E5)
                 )
             )
 
@@ -79,8 +106,8 @@ fun LoginScreen(
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                    focusedContainerColor = Color(0xFFFEF9E5),
+                    unfocusedContainerColor = Color(0xFFFEF9E5)
                 )
             )
 
@@ -89,7 +116,7 @@ fun LoginScreen(
                 Text(
                     text = errorMessage,
                     color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = coinyFont),
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -113,9 +140,16 @@ fun LoginScreen(
                             }
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonColors(
+                            Color(0xFFFEF9E5),
+                            Color(0xFF895349),
+                            Color(0xFFFEF9E5),
+                            Color(0xFFFEF9E5))
             ) {
-                Text(text = "Login")
+                Text(text = "Login", style = MaterialTheme.typography.bodyMedium.copy(
+                        fontFamily = coinyFont
+                ))
             }
 
             // Register Button
@@ -123,9 +157,16 @@ fun LoginScreen(
                 onClick = {
                     navigationHelper.navigateToRegister()
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonColors(
+                    Color(0xFFFEF9E5),
+                    Color(0xFF895349),
+                    Color(0xFFFEF9E5),
+                    Color(0xFFFEF9E5))
             ) {
-                Text(text = "Register")
+                Text(text = "Register", style = MaterialTheme.typography.bodyMedium.copy(
+                    fontFamily = coinyFont
+                ))
             }
         }
     }

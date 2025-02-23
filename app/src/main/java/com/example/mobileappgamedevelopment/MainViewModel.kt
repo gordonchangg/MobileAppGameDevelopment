@@ -1,5 +1,9 @@
 package com.example.mobileappgamedevelopment
 
+import android.content.Context
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,7 +17,9 @@ class MainViewModel() : ViewModel() {
     var audioManager = AudioManager()
 
     lateinit var currentUserId : String
-
+    val coinyFont = FontFamily(
+        Font(R.font.coiny)
+    )
     private val _textInfoList = MutableLiveData<MutableList<TextInfo>>(mutableListOf())
     val textInfoList: LiveData<MutableList<TextInfo>> = _textInfoList
 
