@@ -263,29 +263,35 @@ class GameScene : IScene {
     override fun onActionDown(normalizedX: Float, normalizedY: Float) {
 
         if (toShopSceneButton.contains(normalizedX, normalizedY)) {
+            viewModel.audioManager.playAudio(R.raw.uiclick)
             viewModel.removeTextInfo(coinsText)
             inScene = false;
             sceneManager?.setScene(ShopScene::class, viewModel)
         }
         else if (recipeIcon.contains(normalizedX, normalizedY)) {
+            viewModel.audioManager.playAudio(R.raw.uiclick)
             recipebook.position = floatArrayOf(0.0f, 0.0f, 0f)
         }
         else if (recipebook.contains(normalizedX, normalizedY)) {
+            viewModel.audioManager.playAudio(R.raw.uiclick)
             recipebook.position = floatArrayOf(-1.0f, -1.0f, 0f)
 
         }else if(sendToCafe_cake && cake.contains(normalizedX, normalizedY)){
+            viewModel.audioManager.playAudio(R.raw.bell)
             val deleteEntity: Entity = getEntityByTextureId(R.drawable.strawberrcake) ?: return
             deleteEntity(deleteEntity)
             viewModel.addFoodItem("cake")
             sendToCafe_cake = false
         }
         else if(sendToCafe_cupcake && cupcake.contains(normalizedX, normalizedY)){
+            viewModel.audioManager.playAudio(R.raw.bell)
             val deleteEntity: Entity = getEntityByTextureId(R.drawable.cupcake) ?: return
             deleteEntity(deleteEntity)
             viewModel.addFoodItem("cupcake")
             sendToCafe_cupcake = false
         }
         else if(sendToCafe_latte && latte.contains(normalizedX, normalizedY)){
+            viewModel.audioManager.playAudio(R.raw.bell)
             val deleteEntity: Entity = getEntityByTextureId(R.drawable.latte) ?: return
             deleteEntity(deleteEntity)
             viewModel.addFoodItem("latte")
@@ -310,7 +316,6 @@ class GameScene : IScene {
                         isHolding = false
                         ori_pos = entity.position.copyOf()
 
-                        viewModel.audioManager.playAudio(R.raw.uiclick)
                         holdHandler.postDelayed(holdRunnable, 85)
                         return
                     }
@@ -385,7 +390,7 @@ class GameScene : IScene {
 
         if (draggingEntity != null) {
             if (!isHolding) {
-                viewModel.audioManager.playAudio(R.raw.scoop)
+//                viewModel.audioManager.playAudio(R.raw.scoop)
             }
             // Convert entity position to grid indices BEFORE updating position
             val previousX =
@@ -412,6 +417,17 @@ class GameScene : IScene {
             if (!isHolding) {
                 val ingredientTexture = producerToIngredient[draggingEntity!!.textureId]
 
+                if (ingredientTexture != null) {
+                    val (xIndex, yIndex) = findNextAvailableGridCellNearProducer(draggingEntity!!)
+
+                    if (xIndex == -1 || yIndex == -1) {
+                        // 🚨 No available grid, do not deduct money
+                        viewModel.audioManager.playAudio(R.raw.click) // Play "no space" sound
+                        println("❌ No available grid! Production canceled.") // Debug log
+                        return // Exit the function early
+                    }
+
+                    // ✅ Only subtract money if there's space to produce the item
                     val hasEnoughCoins = when (draggingEntity!!.textureId) {
                         producer_seed -> viewModel.subtractCoins(2)
                         producer_wheatplant -> viewModel.subtractCoins(3)
@@ -420,22 +436,24 @@ class GameScene : IScene {
                     }
 
                     if (!hasEnoughCoins) {
-                        // Play sound when the player does not have enough coins
-                        viewModel.audioManager.playAudio(R.raw.shaking)
+                        // 🚨 Stop production if the player doesn't have enough money
+                        viewModel.audioManager.playAudio(R.raw.click) // Play "no money" sound
+                        println("❌ Not enough coins! Production canceled.") // Debug log
+                        return // Exit the function immediately
                     }
-                if (ingredientTexture != null) {
-                    val (xIndex, yIndex) = findNextAvailableGridCellNearProducer(draggingEntity!!)
-                    if (xIndex != -1 && yIndex != -1) {
-                        addEntityToCell(xIndex, yIndex, ingredientTexture) // Spawn ingredient
-                        println("Ingredient spawned at ($xIndex, $yIndex)")
-                    }
+
+                    // ✅ Produce the item now that both checks passed
+                    addEntityToCell(xIndex, yIndex, ingredientTexture)
+                    viewModel.audioManager.playAudio(R.raw.collectmoney) // Play success sound
+                    println("✅ Ingredient spawned at ($xIndex, $yIndex)")
                 }
             }
+
 
             else {
 
                 if (!isCellOccupied(gridX, gridY, excludeEntity = draggingEntity)) {
-                    viewModel.audioManager.playAudio(R.raw.mainmenuclick)
+//                    viewModel.audioManager.playAudio(R.raw.mainmenuclick)
                     draggingEntity!!.position =
                         getCellCenter(gridX, gridY, gridMinX, gridMinY, cellWidth, cellHeight)
                     println("Entity placed successfully at ($gridX, $gridY)")
@@ -449,7 +467,7 @@ class GameScene : IScene {
                         newTexture?.let {
                             // ✅ Only update if `newTexture` is NOT null
                             existingEntity.textureId = it
-                            viewModel.audioManager.playAudio(R.raw.shaking)
+                                viewModel.audioManager.playAudio(R.raw.shaking)
                             println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
 
                             // ✅ Delete the second entity off-screen
@@ -492,13 +510,14 @@ class GameScene : IScene {
 
                         if (pair == setOf(R.drawable.strawberry, R.drawable.sponge)) {
                             existingEntity.textureId = R.drawable.strawberrcake
-
+                            viewModel.audioManager.playAudio(R.raw.sparkle)
                             println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
 
                             // ✅ Delete the second entity off-screen
                             deleteEntity(draggingEntity!!)
                             println("Dragged entity deleted after merging.")
                         } else if (pair == setOf(R.drawable.wrapper, R.drawable.muffin)) {
+                            viewModel.audioManager.playAudio(R.raw.sparkle)
                             existingEntity.textureId = R.drawable.cupcake
 
                             println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
@@ -507,6 +526,7 @@ class GameScene : IScene {
                             deleteEntity(draggingEntity!!)
                             println("Dragged entity deleted after merging.")
                         } else if (pair == setOf(R.drawable.vanilla, R.drawable.cup)) {
+                            viewModel.audioManager.playAudio(R.raw.sparkle)
                             //change in the future
                             existingEntity.textureId = R.drawable.latte
 

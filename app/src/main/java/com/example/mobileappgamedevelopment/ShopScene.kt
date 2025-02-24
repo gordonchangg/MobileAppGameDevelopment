@@ -71,7 +71,7 @@ class ShopScene : IScene {
 
     override fun onSurfaceCreated() {
 
-        viewModel.audioManager.playBGM(R.raw.endofdayloop)
+        //viewModel.audioManager.playBGM(R.raw.endofdayloop)
         startCustomerSpawner()
 
         //plate
@@ -373,7 +373,7 @@ class ShopScene : IScene {
     }
 
     override fun onActionDown(normalizedX: Float, normalizedY: Float) {
-        viewModel.audioManager.playAudio(R.raw.click)
+        viewModel.audioManager.playAudio(R.raw.uiclick)
         synchronized(entities) {
             if(toGameSceneButton.contains(normalizedX, normalizedY)){
                 viewModel.removeTextInfo(coinsText)
