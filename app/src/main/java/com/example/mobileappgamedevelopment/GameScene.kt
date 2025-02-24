@@ -329,16 +329,6 @@ class GameScene : IScene {
         }
     }
 
-    fun addCoinsToPlayer(amount: Long) {
-        viewModel.addCoins(amount) // This updates LiveData & database
-    }
-
-    fun subtractCoinsFromPlayer(amount: Int) {
-        if (!viewModel.subtractCoins(amount)) {
-            println("Not enough coins!") // Prevents negative balance
-        }
-    }
-
     fun isCellOccupied(xIndex: Int, yIndex: Int, excludeEntity: Entity? = null): Boolean {
         val occupiedCells = entities.filter { it != excludeEntity } // Exclude dragging entity
             .map { entity ->
@@ -423,9 +413,9 @@ class GameScene : IScene {
                 val ingredientTexture = producerToIngredient[draggingEntity!!.textureId]
 
                     val hasEnoughCoins = when (draggingEntity!!.textureId) {
-                        producer_seed -> viewModel.subtractCoins(5)
-                        producer_wheatplant -> viewModel.subtractCoins(10)
-                        producer_book -> viewModel.subtractCoins(15)
+                        producer_seed -> viewModel.subtractCoins(2)
+                        producer_wheatplant -> viewModel.subtractCoins(3)
+                        producer_book -> viewModel.subtractCoins(4)
                         else -> true // Default case (no deduction needed)
                     }
 
