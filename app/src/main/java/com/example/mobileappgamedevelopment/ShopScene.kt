@@ -20,6 +20,8 @@ class ShopScene : IScene {
     private val maxCustomers = 4
     private var spawnIndex = 0
 
+    private var inScene = false;
+
     private val path = listOf(
         floatArrayOf(0.3f, 0.45f, 0f),
         floatArrayOf(0.3f, 0.25f, 0f),
@@ -141,10 +143,10 @@ class ShopScene : IScene {
         entities.add(latte)
 
         //food item count
-        cakeCount = TextInfo("0") // Start with 0, will be updated
-        cakeCount.offsetX = 160.dp
-        cakeCount.offsetY = (-143).dp
-        viewModel.addTextInfo(cakeCount)
+//        cakeCount = TextInfo("0") // Start with 0, will be updated
+//        cakeCount.offsetX = 160.dp
+//        cakeCount.offsetY = (-143).dp
+//        viewModel.addTextInfo(cakeCount)
 
         // Initialize coins text
         coinsText = TextInfo("0") // Start with 0, will be updated
@@ -158,17 +160,20 @@ class ShopScene : IScene {
         entities.add(coinIcon)
 
         // 🪙 Observe changes in coins LiveData and update UI
-        Handler(Looper.getMainLooper()).post {
+        CoroutineScope(Dispatchers.Main).launch{
             viewModel.coins.observeForever { newCoins ->
-                viewModel.removeTextInfo(coinsText)
-                coinsText.text = "$newCoins" // Update text dynamically
-                println("🪙 Coins updated in ShopScene: $newCoins") // Debug log
-                viewModel.addTextInfo(coinsText)
+                if (inScene) {
+                    viewModel.removeTextInfo(coinsText)
+                    coinsText.text = "$newCoins" // Update text dynamically
+                    println("🪙 Coins updated in ShopScene: $newCoins") // Debug log
+                    viewModel.addTextInfo(coinsText)
+                }
             }
         }
     }
 
     override fun onEnter() {
+        inScene = true
         Handler(Looper.getMainLooper()).post {
             viewModel.removeTextInfo(coinsText)
             viewModel.addTextInfo(coinsText)
@@ -371,6 +376,7 @@ class ShopScene : IScene {
         synchronized(entities) {
             if(toGameSceneButton.contains(normalizedX, normalizedY)){
                 viewModel.removeTextInfo(coinsText)
+                inScene = false;
                 sceneManager?.setScene(GameScene::class, viewModel)
             }
         }
