@@ -53,7 +53,7 @@ fun MainScreen(navigationHelper: NavigationHelper, Username: String, viewModel: 
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.BottomCenter // Center the content vertically and horizontally
     ) {
-        val userId = Username
+        val userId = Username.substringBefore("@")
         val email = Username
         var coins = 100
         LaunchedEffect(email) {
@@ -79,28 +79,29 @@ fun MainScreen(navigationHelper: NavigationHelper, Username: String, viewModel: 
         )
 
 
-            val textInfoList by viewModel.textInfoList.observeAsState(mutableListOf())
+        val textInfoList by viewModel.textInfoList.observeAsState(mutableListOf())
 
 
-            textInfoList.forEach { textInfo ->
-                Column(modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(16.dp)) {
-                    val density = LocalDensity.current
-                    val offsetX = with(density) { textInfo.offsetX }
-                    val offsetY = with(density) { textInfo.offsetY }
+        textInfoList.forEach { textInfo ->
+            Column(modifier = Modifier
+                .align(Alignment.Center)
+                .padding(16.dp)) {
+                val density = LocalDensity.current
+                val offsetX = with(density) { textInfo.offsetX }
+                val offsetY = with(density) { textInfo.offsetY }
 
-                    Text(
-                        text = textInfo.text,
-                        fontSize = textInfo.fontSize,
-                        color = textInfo.color,
-                        modifier = Modifier
-                            .absoluteOffset(x = offsetX, y = offsetY)
-                            .padding(8.dp)
-                    )
+                Text(
+                    text = textInfo.text,
+                    fontSize = textInfo.fontSize,
+                    color = textInfo.color,
+                    modifier = Modifier
+                        .absoluteOffset(x = offsetX, y = offsetY)
+                        .padding(8.dp)
+                )
 
-                }
             }
+        }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()

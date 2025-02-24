@@ -99,9 +99,11 @@ class MainViewModel() : ViewModel() {
     }
 
     fun removeTextInfo(textInfo: TextInfo) {
-        val currentList = _textInfoList.value?.toMutableList() ?: mutableListOf()
-        currentList.remove(textInfo)
-        _textInfoList.value = currentList
+        CoroutineScope(Dispatchers.Main).launch{
+            val currentList = _textInfoList.value?.toMutableList() ?: mutableListOf()
+            currentList.remove(textInfo)
+            _textInfoList.value = currentList
+        }
     }
 
     private val database = Database()
