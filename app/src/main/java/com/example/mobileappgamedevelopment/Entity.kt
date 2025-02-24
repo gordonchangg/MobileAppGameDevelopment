@@ -7,6 +7,7 @@ class Entity(
     var scale: FloatArray = floatArrayOf(1f, 1f, 1f),     // scaleX, scaleY, scaleZ
     var rotation: Float = 0f,                             // Rotation angle in degrees
     var textureId: Int,                                   // Texture ID
+    var layerId: UInt = 0u,
 
     val userData: MutableMap<String, Any?> = mutableMapOf()
 ) {

@@ -196,6 +196,8 @@ class GameScene : IScene {
 
         viewModel.removeTextInfo(coinsText)
         viewModel.addTextInfo(coinsText)
+
+        viewModel.audioManager.playBGM(R.raw.endofdayloop)
     }
 
     override fun onSurfaceChanged() {}
@@ -269,6 +271,7 @@ class GameScene : IScene {
         }
         else if (recipeIcon.contains(normalizedX, normalizedY)) {
             recipebook.position = floatArrayOf(0.0f, 0.0f, 0f)
+            recipebook.layerId = 1u
         }
         else if (recipebook.contains(normalizedX, normalizedY)) {
             recipebook.position = floatArrayOf(-1.0f, -1.0f, 0f)

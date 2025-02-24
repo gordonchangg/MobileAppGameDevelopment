@@ -71,7 +71,6 @@ class ShopScene : IScene {
 
     override fun onSurfaceCreated() {
 
-        viewModel.audioManager.playBGM(R.raw.endofdayloop)
         startCustomerSpawner()
 
         //plate
@@ -179,6 +178,8 @@ class ShopScene : IScene {
             viewModel.removeTextInfo(coinsText)
             viewModel.addTextInfo(coinsText)
         }
+
+        viewModel.audioManager.playBGM(R.raw.endofdayloop)
 
     }
 

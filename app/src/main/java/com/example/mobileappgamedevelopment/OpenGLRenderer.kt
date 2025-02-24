@@ -97,7 +97,8 @@ class OpenGLRenderer(private val context: Context, private val viewModel: MainVi
         }
 
         val entities = viewModel.sceneManager.getEntities()
-        for (entity in entities) {
+        val sortedEntities = entities.sortedBy { it.layerId } // Sort by layerId
+        for (entity in sortedEntities) {
             drawEntity(entity, shader, vPMatrix)
         }
     }

@@ -12,6 +12,7 @@ class AudioManager {
     }
 
     fun playBGM(audioId: Int) {
+        stopAudio()
         mediaPlayer = MediaPlayer.create(context, audioId)
 
         mediaPlayer?.isLooping = true
