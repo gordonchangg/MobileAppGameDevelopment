@@ -78,37 +78,29 @@ fun MainScreen(navigationHelper: NavigationHelper, Username: String, viewModel: 
             viewModel
         )
 
-        Column(modifier = Modifier
-            .align(Alignment.Center)
-            .padding(16.dp)) {
-            val coinInfo = TextInfo("100")
+
             val textInfoList by viewModel.textInfoList.observeAsState(mutableListOf())
 
 
             textInfoList.forEach { textInfo ->
-                val density = LocalDensity.current
-                val offsetX = with(density) { textInfo.offsetX }
-                val offsetY = with(density) { textInfo.offsetY }
+                Column(modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp)) {
+                    val density = LocalDensity.current
+                    val offsetX = with(density) { textInfo.offsetX }
+                    val offsetY = with(density) { textInfo.offsetY }
 
-                Text(
-                    text = textInfo.text,
-                    fontSize = textInfo.fontSize,
-                    color = textInfo.color,
-                    modifier = Modifier
-                        .absoluteOffset(x = offsetX, y = offsetY)
-                        .padding(8.dp)
-                )
+                    Text(
+                        text = textInfo.text,
+                        fontSize = textInfo.fontSize,
+                        color = textInfo.color,
+                        modifier = Modifier
+                            .absoluteOffset(x = offsetX, y = offsetY)
+                            .padding(8.dp)
+                    )
+
+                }
             }
-
-//            Text(
-//                text = "100",
-//                fontSize = 24.sp,
-//                color = Color.Blue,
-//                modifier = Modifier
-//                    .absoluteOffset(x = 100.dp, y = -400.dp)
-//                    .padding(8.dp)
-//            )
-        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()

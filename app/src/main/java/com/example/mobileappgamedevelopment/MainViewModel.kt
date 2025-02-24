@@ -6,6 +6,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 
 
@@ -35,9 +38,11 @@ class MainViewModel() : ViewModel() {
     val foodItemCounts: LiveData<Map<String, Int>> = _foodItemCounts
 
     fun addTextInfo(textInfo: TextInfo) {
-        val currentList = _textInfoList.value?.toMutableList() ?: mutableListOf()
-        currentList.add(textInfo)
-        _textInfoList.postValue(currentList)
+        CoroutineScope(Dispatchers.Main).launch {
+            val currentList = _textInfoList.value?.toMutableList() ?: mutableListOf()
+            currentList.add(textInfo)
+            _textInfoList.value = currentList // Safe to use setValue on the main thread
+        }
     }
 
     fun isFoodItemExists(food: String): Boolean {
