@@ -101,7 +101,7 @@ fun RankingScreen(
             modifier = Modifier
                 .padding(16.dp)
                 .offset(0.dp, 200.dp)
-                .height(600.dp)
+                .height(580.dp)
 
         ) {
             itemsIndexed(users.sortedByDescending { (it["coins"] as? Long) ?: 0 }) { index, user ->

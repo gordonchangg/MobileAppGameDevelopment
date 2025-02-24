@@ -6,24 +6,16 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.mobileappgamedevelopment.ui.theme.MobileAppGameDevelopmentTheme
 import com.google.firebase.FirebaseApp
-import kotlinx.serialization.Serializable
-
 
 
 class MainActivity : ComponentActivity() {
@@ -48,7 +40,7 @@ class MainActivity : ComponentActivity() {
 
                     Box(modifier = Modifier.fillMaxSize()) {
                         // Navigation host
-                        NavHost(navController = navController, startDestination = Screen.Login.route) {
+                        NavHost(navController = navController, startDestination = Screen.Main("hoho@gmail.com").route) {
                             composable(Screen.Login.route) {
                                 val navigationHelper = remember { NavigationHelper(navController) }
                                 LoginScreen(navigationHelper = navigationHelper)
