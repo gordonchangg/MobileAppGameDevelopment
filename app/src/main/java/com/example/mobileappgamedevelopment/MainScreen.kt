@@ -53,7 +53,7 @@ fun MainScreen(navigationHelper: NavigationHelper, Username: String, viewModel: 
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.BottomCenter // Center the content vertically and horizontally
     ) {
-        val userId = "user1"
+        val userId = Username
         val email = Username
         var coins = 100
         LaunchedEffect(email) {
