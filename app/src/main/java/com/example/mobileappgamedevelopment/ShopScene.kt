@@ -3,6 +3,7 @@ package com.example.mobileappgamedevelopment
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -19,8 +20,6 @@ class ShopScene : IScene {
     private val customerQueue: ArrayDeque<Entity> = ArrayDeque()
     private val maxCustomers = 4
     private var spawnIndex = 0
-
-    private var inScene = false;
 
     private val path = listOf(
         floatArrayOf(0.3f, 0.45f, 0f),
@@ -60,6 +59,10 @@ class ShopScene : IScene {
     lateinit var cupcake: Entity
     lateinit var latte: Entity
 
+    lateinit var textBG: Entity
+
+    lateinit var foodItemText: TextInfo
+
     lateinit var cakeCount: TextInfo
     lateinit var cupcakeCount: TextInfo
     lateinit var latteCount: TextInfo
@@ -71,7 +74,6 @@ class ShopScene : IScene {
 
     override fun onSurfaceCreated() {
 
-        viewModel.audioManager.playBGM(R.raw.endofdayloop)
         startCustomerSpawner()
 
         //plate
@@ -91,7 +93,7 @@ class ShopScene : IScene {
         entities.add(plate)
 
 //        repeat(1) { index ->
-//            val entity = entityManager.createEntity(R.drawable.placeholder_customer)
+//            val entity = entityManager.createEntity(R.drawable.catfront)
 //            entity.position = floatArrayOf(-0.8f, 0.8f, 0f)
 //            entity.scale = floatArrayOf(0.2f, 0.2f, 1f)
 //            entity.userData["path"] = path
@@ -143,11 +145,36 @@ class ShopScene : IScene {
         latte.scale = floatArrayOf(0.14f, 0.14f, 0.14f)
         entities.add(latte)
 
-        //food item count
-//        cakeCount = TextInfo("0") // Start with 0, will be updated
-//        cakeCount.offsetX = 160.dp
-//        cakeCount.offsetY = (-143).dp
-//        viewModel.addTextInfo(cakeCount)
+        // Initialize TextBG
+        textBG = entityManager.createEntity(R.drawable.app_bg)
+        textBG.scale = floatArrayOf(0.2f, 0.12f, 0.2f)
+        textBG.position = floatArrayOf(-1f, 1f, 0f)
+        entities.add(textBG)
+
+        foodItemText = TextInfo("hello")
+        foodItemText.fontSize = 20.sp
+        foodItemText.offsetX = -500.dp
+        foodItemText.offsetY = (-500).dp
+        viewModel.addTextInfo(foodItemText)
+
+        // Initialize food item count
+        cakeCount = TextInfo("0")
+        cakeCount.fontSize = 20.sp
+        cakeCount.offsetX = -500.dp
+        cakeCount.offsetY = (-500).dp
+        viewModel.addTextInfo(cakeCount)
+
+        cupcakeCount = TextInfo("0")
+        cupcakeCount.fontSize = 20.sp
+        cupcakeCount.offsetX = -500.dp
+        cupcakeCount.offsetY = (-500).dp
+        viewModel.addTextInfo(cupcakeCount)
+
+        latteCount = TextInfo("0")
+        latteCount.fontSize = 20.sp
+        latteCount.offsetX = -500.dp
+        latteCount.offsetY = (-500).dp
+        viewModel.addTextInfo(latteCount)
 
         // Initialize coins text
         coinsText = TextInfo("0") // Start with 0, will be updated
@@ -161,20 +188,17 @@ class ShopScene : IScene {
         entities.add(coinIcon)
 
         // 🪙 Observe changes in coins LiveData and update UI
-        CoroutineScope(Dispatchers.Main).launch{
+        Handler(Looper.getMainLooper()).post {
             viewModel.coins.observeForever { newCoins ->
-                if (inScene) {
-                    viewModel.removeTextInfo(coinsText)
-                    coinsText.text = "$newCoins" // Update text dynamically
-                    println("🪙 Coins updated in ShopScene: $newCoins") // Debug log
-                    viewModel.addTextInfo(coinsText)
-                }
+                viewModel.removeTextInfo(coinsText)
+                coinsText.text = "$newCoins" // Update text dynamically
+                println("🪙 Coins updated in ShopScene: $newCoins") // Debug log
+                viewModel.addTextInfo(coinsText)
             }
         }
     }
 
     override fun onEnter() {
-        inScene = true
         Handler(Looper.getMainLooper()).post {
             viewModel.removeTextInfo(coinsText)
             viewModel.addTextInfo(coinsText)
@@ -265,8 +289,6 @@ class ShopScene : IScene {
         }
     }
 
-
-
     private fun getExitPath(customer: Entity): List<FloatArray> {
         val currentPos = customer.position
         val exitX = 0.35f // Move to this x-position before exiting
@@ -299,7 +321,6 @@ class ShopScene : IScene {
         onComplete?.invoke()
     }
 
-
     private fun interpolate(start: FloatArray, end: FloatArray, t: Float): FloatArray {
         return floatArrayOf(
             start[0] + (end[0] - start[0]) * t,
@@ -309,21 +330,35 @@ class ShopScene : IScene {
     }
 
     override fun update() {
-
         coinsText.text = "${viewModel.coins.value ?: 0u}"
-
-        //update food item count
-        //cakeCount.text = "${viewModel.getFoodItemCount("cake")?: 0u}"
 
         if(viewModel.isFoodItemExists("cake")){
             cake.position = floatArrayOf(-0.325f, 0.45f, 0f)
+
+            // Update cakeCount
+            Handler(Looper.getMainLooper()).post {
+                val newCakeCount = viewModel.getFoodItemCount("cake")
+                viewModel.removeTextInfo(cakeCount)
+                cakeCount.text = "x $newCakeCount" // Update text dynamically
+                println("Cake count updated in ShopScene: $newCakeCount") // Debug log
+                viewModel.addTextInfo(cakeCount)
+            }
         }
-        else if (viewModel.getFoodItemCount("cake") == 0){
+        else{
             cake.position = floatArrayOf(-10f, -10f, 0f)
         }
 
         if(viewModel.isFoodItemExists("cupcake")){
             cupcake.position = floatArrayOf(-0.155f, 0.435f, 0f)
+
+            // Update cupcakeCount
+            Handler(Looper.getMainLooper()).post {
+                val newCupcakeCount = viewModel.getFoodItemCount("cupcake")
+                viewModel.removeTextInfo(cupcakeCount)
+                cupcakeCount.text = "x $newCupcakeCount" // Update text dynamically
+                println("Cake count updated in ShopScene: $newCupcakeCount") // Debug log
+                viewModel.addTextInfo(cupcakeCount)
+            }
         }
         else if (viewModel.getFoodItemCount("cupcake") == 0){
             cupcake.position = floatArrayOf(-10f, -10f, 0f)
@@ -331,6 +366,15 @@ class ShopScene : IScene {
 
         if(viewModel.isFoodItemExists("latte")){
             latte.position = floatArrayOf(0.03f, 0.445f, 0f)
+
+            // Update latteCount
+            Handler(Looper.getMainLooper()).post {
+                val newLatteCount = viewModel.getFoodItemCount("latte")
+                viewModel.removeTextInfo(latteCount)
+                latteCount.text = "x $newLatteCount" // Update text dynamically
+                println("Cake count updated in ShopScene: $newLatteCount") // Debug log
+                viewModel.addTextInfo(latteCount)
+            }
         }
         else if (viewModel.getFoodItemCount("latte") == 0){
             latte.position = floatArrayOf(-10f, -10f, 0f)
@@ -374,12 +418,64 @@ class ShopScene : IScene {
 
     override fun onActionDown(normalizedX: Float, normalizedY: Float) {
         viewModel.audioManager.playAudio(R.raw.click)
+
         synchronized(entities) {
             if(toGameSceneButton.contains(normalizedX, normalizedY)){
                 viewModel.removeTextInfo(coinsText)
-                inScene = false;
                 sceneManager?.setScene(GameScene::class, viewModel)
             }
+
+            // Click on cake to display quantity
+            if (cake.contains(normalizedX, normalizedY)) {
+                textBG.scale = floatArrayOf(0.2f, 0.12f, 0.2f)
+                textBG.position = floatArrayOf(-0.33f, 0.56f, 0f)
+
+                foodItemText.text = "CAKE"
+                foodItemText.offsetX = -155.dp
+                foodItemText.offsetY = (-270).dp
+
+                cakeCount.offsetX = -155.dp
+                cakeCount.offsetY = (-250).dp
+            }
+            else if (cupcake.contains(normalizedX, normalizedY)) {
+                textBG.scale = floatArrayOf(0.27f, 0.12f, 0.2f)
+                textBG.position = floatArrayOf(-0.16f, 0.56f, 0f)
+
+                foodItemText.text = "CUPCAKE"
+                foodItemText.offsetX = -75.dp
+                foodItemText.offsetY = (-270).dp
+
+                cupcakeCount.offsetX = -75.dp
+                cupcakeCount.offsetY = (-250).dp
+            }
+            else if (latte.contains(normalizedX, normalizedY)) {
+                textBG.scale = floatArrayOf(0.2f, 0.12f, 0.2f)
+                textBG.position = floatArrayOf(0.01f, 0.56f, 0f)
+
+                foodItemText.text = "LATTE"
+                foodItemText.offsetX = 5.dp
+                foodItemText.offsetY = (-270).dp
+
+                latteCount.offsetX = 5.dp
+                latteCount.offsetY = (-250).dp
+            }
+
+            // Set a timer to hide text after 2 seconds
+            Handler(Looper.getMainLooper()).postDelayed({
+                textBG.position = floatArrayOf(-1f, 1f, 0f)
+
+                foodItemText.offsetX = -500.dp
+                foodItemText.offsetY = (-500).dp
+
+                cakeCount.offsetX = -500.dp
+                cakeCount.offsetY = (-500).dp
+
+                cupcakeCount.offsetX = -500.dp
+                cupcakeCount.offsetY = (-500).dp
+
+                latteCount.offsetX = -500.dp
+                latteCount.offsetY = (-500).dp
+            }, 2000)
         }
     }
 
