@@ -1,16 +1,21 @@
 package com.example.mobileappgamedevelopment
 
+import androidx.lifecycle.viewmodel.compose.viewModel
 import java.util.Collections
+import java.util.UUID
 
 class Entity(
-    var position: FloatArray = floatArrayOf(0f, 0f, 0f), // x, y, z
-    var scale: FloatArray = floatArrayOf(1f, 1f, 1f),     // scaleX, scaleY, scaleZ
+    val id: String = UUID.randomUUID().toString(),
+    var position: MutableList<Float> = mutableListOf(0f, 0f, 0f), // x, y, z
+    var scale: MutableList<Float> = mutableListOf(1f, 1f, 1f),     // scaleX, scaleY, scaleZ
     var rotation: Float = 0f,                             // Rotation angle in degrees
-    var textureId: Int,                                   // Texture ID
     var layerId: UInt = 0u,
+    var textureId: Int = 0,                                   // Texture ID
 
     val userData: MutableMap<String, Any?> = mutableMapOf()
 ) {
+    constructor() : this(UUID.randomUUID().toString(), mutableListOf(0f, 0f, 0f), mutableListOf(1f, 1f, 1f), 0f, 0, mutableMapOf())
+
     fun contains(x: Float, y: Float): Boolean {
         val halfWidth = scale[0] / 2
         val halfHeight = scale[1] / 2
@@ -41,9 +46,9 @@ class EntityManager() {
 
     fun createBackgroundEntity(resourceId: Int){
         background = Entity(textureId = resourceId)
-        background?.position = floatArrayOf(0.0f,0.0f,0.0f)
+        background?.position = mutableListOf(0.0f,0.0f,0.0f)
 
-        background?.scale = floatArrayOf(1.0f,2.0f,0.0f)
+        background?.scale = mutableListOf(1.0f,2.0f,0.0f)
     }
 
     fun setBackgroundTexture(resourceId: Int) {

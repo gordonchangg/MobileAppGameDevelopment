@@ -10,6 +10,7 @@ import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
@@ -47,6 +48,115 @@ class Database {
             }
             .addOnFailureListener { e ->
                 Log.w(TAG, "Error deleting user", e)
+            }
+    }
+
+    fun addEntity(userId: String, entity: Entity) {
+        val entityData = mapOf(
+            "id" to entity.id,
+            "textureId" to entity.textureId,
+            "position" to entity.position,
+            "scale" to entity.scale,
+            "rotation" to entity.rotation,
+            "userData" to entity.userData
+        )
+        database.collection(userCollection)
+            .document(userId)
+            .collection("entities")
+            .add(entityData)
+            .addOnSuccessListener {
+                Log.d(TAG, "Entity successfully added!")
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error adding entity", e)
+            }
+
+    }
+
+    fun deleteEntity(userId: String, entityId: String) {
+        val userRef = database.collection(userCollection).document(userId)
+        val entitiesRef = userRef.collection("entities")
+
+        entitiesRef.whereEqualTo("id", entityId).get()
+            .addOnSuccessListener { snapshot ->
+                if (!snapshot.isEmpty) {
+                    for (doc in snapshot.documents) {
+                        val entityRef = entitiesRef.document(doc.id)
+
+                        entityRef.delete()
+                            .addOnSuccessListener {
+                                Log.d(TAG, "Entity with ID $entityId deleted successfully.")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.w(TAG, "Error deleting entity", e)
+                            }
+                    }
+                } else {
+                    Log.d(TAG, "No entity found with ID: $entityId")
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error retrieving entity", e)
+            }
+    }
+
+    fun updateEntity(userId: String, updatedEntity: Entity) {
+        val userRef = database.collection(userCollection).document(userId)
+        val entitiesRef = userRef.collection("entities")
+
+        entitiesRef.whereEqualTo("id", updatedEntity.id).get()
+            .addOnSuccessListener { snapshot ->
+                if (!snapshot.isEmpty) {
+                    for (doc in snapshot.documents) {
+                        val entityRef = entitiesRef.document(doc.id)
+                        val entityData = mapOf(
+                            "position" to updatedEntity.position,
+                            "scale" to updatedEntity.scale,
+                            "rotation" to updatedEntity.rotation,
+                            "textureId" to updatedEntity.textureId,
+                            "userData" to updatedEntity.userData
+                        )
+
+                        entityRef.set(entityData, SetOptions.merge())
+                            .addOnSuccessListener {
+                                Log.d(TAG, "Entity updated successfully.")
+                            }
+                            .addOnFailureListener { e ->
+                                Log.w(TAG, "Error updating entity", e)
+                            }
+                    }
+                } else {
+                    Log.d(TAG, "No entity found with ID: ${updatedEntity.id}")
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error retrieving entity", e)
+            }
+    }
+
+    fun loadEntities(userId: String, entityList: MutableList<Entity>,
+        onSuccess: () -> Unit, onFailure: (Exception) -> Unit
+    ) {
+        database.collection(userCollection)
+            .document(userId)
+            .collection("entities")
+            .get()
+            .addOnSuccessListener { result ->
+                synchronized(entityList)
+                {
+                    entityList.clear()
+
+                    if (result.isEmpty) {
+                        Log.d(TAG, "Entities collection exists but is empty")
+                    } else {
+                        entityList.addAll(result.documents.mapNotNull { it.toObject(Entity::class.java) })
+                    }
+                }
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error getting entities", e)
+                onFailure(e)
             }
     }
 

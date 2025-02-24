@@ -6,12 +6,18 @@ import androidx.compose.ui.unit.dp
 
 class GameScene : IScene {
     override val entities: MutableList<Entity> = mutableListOf()
+
+    //for grid entities only
+    var temp_entities: MutableList<Entity> = mutableListOf()
+
     override lateinit var entityManager: EntityManager
     override var sceneManager: SceneManager? = null
     override val lines: MutableList<LineInfo> = mutableListOf()
     override lateinit var viewModel: MainViewModel
 
     lateinit var coinsText : TextInfo
+
+    var firstRun = false
 
     val gridWidth = 6
     val gridHeight = 6
@@ -27,7 +33,7 @@ class GameScene : IScene {
     val lightColor = floatArrayOf(0.95f, 0.85f, 0.60f, 1f) // Light beige
     val darkColor = floatArrayOf(0.80f, 0.60f, 0.40f, 1f) // Darker beige
 
-    var ori_pos = floatArrayOf(0.0f, 0.0f, 0.0f)
+    var ori_pos = mutableListOf(0.0f, 0.0f, 0.0f)
 
     val cellColors = Array(gridWidth) { x ->
         Array(gridHeight) { y ->
@@ -38,7 +44,6 @@ class GameScene : IScene {
     private var draggingEntity: Entity? = null
     private var isDragging = false
     private var isHolding = false
-    private var isRecipeBookOpen = false
     private val holdHandler = Handler(Looper.getMainLooper())
 
     //send to cafe booleans
@@ -87,8 +92,8 @@ class GameScene : IScene {
 
         //button
         cake = entityManager.createEntity(R.drawable.nrycake)
-        cake.position = floatArrayOf(-0.30f, 0.48f, 0f)
-        cake.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+        cake.position = mutableListOf(-0.30f, 0.48f, 0f)
+        cake.scale = mutableListOf(0.19f, 0.26f, 0.21f)
         entities.add(cake)
 
         // Initialize coins text
@@ -98,25 +103,29 @@ class GameScene : IScene {
         viewModel.addTextInfo(coinsText)
 
         coinIcon = entityManager.createEntity(R.drawable.coin)
-        coinIcon.position = floatArrayOf(0.23f, 0.31f, 0f)
-        coinIcon.scale = floatArrayOf(0.07f, 0.07f, 0.07f)
+        coinIcon.position = mutableListOf(0.23f, 0.31f, 0f)
+        coinIcon.scale = mutableListOf(0.07f, 0.07f, 0.07f)
         entities.add(coinIcon)
 
         cupcake = entityManager.createEntity(R.drawable.nrycupcake)
-        cupcake.position = floatArrayOf(-0.10f, 0.48f, 0f)
-        cupcake.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+        cupcake.position = mutableListOf(-0.10f, 0.48f, 0f)
+        cupcake.scale = mutableListOf(0.19f, 0.26f, 0.21f)
         entities.add(cupcake)
 
         latte = entityManager.createEntity(R.drawable.nrylatte)
-        latte.position = floatArrayOf(0.10f, 0.48f, 0f)
-        latte.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+        latte.position = mutableListOf(0.10f, 0.48f, 0f)
+        latte.scale = mutableListOf(0.19f, 0.26f, 0.21f)
         entities.add(latte)
 
         recipeIcon = entityManager.createEntity(R.drawable.recipe)
-        recipeIcon.position = floatArrayOf(0.095f, -0.87f, 0f)
-        recipeIcon.scale = floatArrayOf(0.186f, 0.186f, 0.19f)
+        recipeIcon.position = mutableListOf(0.095f, -0.87f, 0f)
+        recipeIcon.scale = mutableListOf(0.186f, 0.186f, 0.19f)
         entities.add(recipeIcon)
 
+        toShopSceneButton = entityManager.createEntity(R.drawable.shopicon)
+        toShopSceneButton.position = mutableListOf(0.3f, -0.87f, 0f)
+        toShopSceneButton.scale = mutableListOf(0.21f, 0.21f, 0.21f)
+        entities.add(toShopSceneButton)
 
         for (x in 0 until gridWidth) {
             for (y in 0 until gridHeight) {
@@ -151,27 +160,49 @@ class GameScene : IScene {
             lines.add(LineInfo(start, end, gridThickness, gridColor))
         }
 
-        // Add game entities
-        addEntityToCell(2, 3, producer_book)
-        addEntityToCell(5, 5, producer_seed)
-        addEntityToCell(3, 5, producer_wheatplant)
+        println("✅✅ templist count before: " + temp_entities.count())
+        viewModel.loadEntities(
+            entityList = temp_entities,
+            onSuccess = {
+                println("✅ temp_Entities loaded successfully: ${temp_entities.size}")
+
+                if (temp_entities.isEmpty()) {
+
+                    println("✅ enter the first run thing")
+                    firstRun = true
+                    // Add game entities
+                    addEntityToCell(2, 3, producer_book)
+                    addEntityToCell(5, 5, producer_seed)
+                    addEntityToCell(3, 5, producer_wheatplant)
 
 
-        //testing========================================
-        addEntityToCell(4, 5, R.drawable.strawberrcake)
-        addEntityToCell(0, 1, R.drawable.cupcake)
-        addEntityToCell(0, 2, R.drawable.latte)
-        //==================================================
+                    //testing========================================
+                    addEntityToCell(4, 5, R.drawable.strawberrcake)
+                    addEntityToCell(0, 1, R.drawable.cupcake)
+                    addEntityToCell(0, 2, R.drawable.latte)
+                    //==================================================
 
-        toShopSceneButton = entityManager.createEntity(R.drawable.shopicon)
-        toShopSceneButton.position = floatArrayOf(0.3f, -0.87f, 0f)
-        toShopSceneButton.scale = floatArrayOf(0.21f, 0.21f, 0.21f)
-        entities.add(toShopSceneButton)
 
-        recipebook = entityManager.createEntity(R.drawable.recipebook)
-        recipebook.position = floatArrayOf(-1.0f, -1.0f, 0f)
-        recipebook.scale = floatArrayOf(0.92f, 1.2f, 0.8f)
-        entities.add(recipebook)
+                    firstRun = false
+                }
+                else
+                {
+                    firstRun = false
+
+                    synchronized(temp_entities)
+                    {
+                        for (entity in temp_entities)
+                        {
+                            val (xIndex, yIndex) = getCellIndexFromPosition(entity.position)
+                            addEntityToCell(xIndex, yIndex, entity.textureId)
+                        }
+                    }
+                }
+            },
+            onFailure = { exception ->
+                println("❌ Error loading entities: ${exception.message}")
+            }
+        )
 
         // 🪙 Observe changes in coins LiveData and update UI
         viewModel.coins.observeForever { newCoins ->
@@ -184,8 +215,8 @@ class GameScene : IScene {
         }
 
         recipebook = entityManager.createEntity(R.drawable.recipebook)
-        recipebook.position = floatArrayOf(-1.0f, -1.0f, 0f)
-        recipebook.scale = floatArrayOf(0.92f, 1.2f, 0.8f)
+        recipebook.position = mutableListOf(-1.0f, -1.0f, 0f)
+        recipebook.scale = mutableListOf(0.92f, 1.2f, 0.8f)
         entities.add(recipebook)
         // Fetch initial coin value from Firebase
         viewModel.getCurrentUserCoins()
@@ -226,17 +257,17 @@ class GameScene : IScene {
         //set back to false
         if(!sendToCafe_cake){
             cake.textureId = R.drawable.nrycake
-            cake.position = floatArrayOf(-0.30f, 0.48f, 0f)
+            cake.position = mutableListOf(-0.30f, 0.48f, 0f)
 
         }
         if(!sendToCafe_cupcake){
             cupcake.textureId = R.drawable.nrycupcake
-            cupcake.position = floatArrayOf(-0.10f, 0.48f, 0f)
+            cupcake.position = mutableListOf(-0.10f, 0.48f, 0f)
 
         }
         if(!sendToCafe_latte){
             latte.textureId = R.drawable.nrylatte
-            latte.scale = floatArrayOf(0.19f, 0.26f, 0.21f)
+            latte.scale = mutableListOf(0.19f, 0.26f, 0.21f)
 
         }
         if(viewModel.isFoodItemExists("cake")){
@@ -262,6 +293,12 @@ class GameScene : IScene {
         return null // Return null if no entity is found in the cell
     }
 
+    fun getCellIndexFromPosition(position: MutableList<Float>): Pair<Int, Int> {
+        val xIndex = ((position[0] - gridMinX) / cellWidth).toInt()
+        val yIndex = ((position[1] - gridMinY) / cellHeight).toInt()
+        return Pair(xIndex, yIndex)
+    }
+
     override fun onActionDown(normalizedX: Float, normalizedY: Float) {
 
         if (toShopSceneButton.contains(normalizedX, normalizedY)) {
@@ -272,31 +309,37 @@ class GameScene : IScene {
         }
         else if (recipeIcon.contains(normalizedX, normalizedY)) {
             viewModel.audioManager.playAudio(R.raw.uiclick)
-            recipebook.position = floatArrayOf(0.0f, 0.0f, 0f)
+            recipebook.position = mutableListOf(0.0f, 0.0f, 0f)
             recipebook.layerId = 1u
         }
         else if (recipebook.contains(normalizedX, normalizedY)) {
             viewModel.audioManager.playAudio(R.raw.uiclick)
-            recipebook.position = floatArrayOf(-1.0f, -1.0f, 0f)
+            recipebook.position = mutableListOf(-1.0f, -1.0f, 0f)
 
         }else if(sendToCafe_cake && cake.contains(normalizedX, normalizedY)){
             viewModel.audioManager.playAudio(R.raw.bell)
             val deleteEntity: Entity = getEntityByTextureId(R.drawable.strawberrcake) ?: return
+            viewModel.deleteEntity(deleteEntity.id)
             deleteEntity(deleteEntity)
+            
             viewModel.addFoodItem("cake")
             sendToCafe_cake = false
         }
         else if(sendToCafe_cupcake && cupcake.contains(normalizedX, normalizedY)){
             viewModel.audioManager.playAudio(R.raw.bell)
             val deleteEntity: Entity = getEntityByTextureId(R.drawable.cupcake) ?: return
+            viewModel.deleteEntity(deleteEntity.id)
             deleteEntity(deleteEntity)
+            
             viewModel.addFoodItem("cupcake")
             sendToCafe_cupcake = false
         }
         else if(sendToCafe_latte && latte.contains(normalizedX, normalizedY)){
             viewModel.audioManager.playAudio(R.raw.bell)
             val deleteEntity: Entity = getEntityByTextureId(R.drawable.latte) ?: return
+            viewModel.deleteEntity(deleteEntity.id)
             deleteEntity(deleteEntity)
+            
             viewModel.addFoodItem("latte")
             sendToCafe_latte = false
         }
@@ -317,7 +360,7 @@ class GameScene : IScene {
                         draggingEntity = entity
                         isDragging = false
                         isHolding = false
-                        ori_pos = entity.position.copyOf()
+                        ori_pos = entity.position.toMutableList()
 
                         holdHandler.postDelayed(holdRunnable, 85)
                         return
@@ -326,6 +369,8 @@ class GameScene : IScene {
             }
 
         }
+
+
     }
 
     fun getEntityInCell(xIndex: Int, yIndex: Int, excludeEntity: Entity? = null): Entity? {
@@ -390,7 +435,6 @@ class GameScene : IScene {
 
         holdHandler.removeCallbacks(holdRunnable) // Stop hold detection
 
-
         if (draggingEntity != null) {
             if (!isHolding) {
 //                viewModel.audioManager.playAudio(R.raw.scoop)
@@ -446,7 +490,9 @@ class GameScene : IScene {
                     }
 
                     // ✅ Produce the item now that both checks passed
+                    firstRun = true
                     addEntityToCell(xIndex, yIndex, ingredientTexture)
+                    firstRun = false
                     viewModel.audioManager.playAudio(R.raw.collectmoney) // Play success sound
                     println("✅ Ingredient spawned at ($xIndex, $yIndex)")
                 }
@@ -459,6 +505,7 @@ class GameScene : IScene {
 //                    viewModel.audioManager.playAudio(R.raw.mainmenuclick)
                     draggingEntity!!.position =
                         getCellCenter(gridX, gridY, gridMinX, gridMinY, cellWidth, cellHeight)
+                    viewModel.updateEntity(draggingEntity!!)
                     println("Entity placed successfully at ($gridX, $gridY)")
 
                 } else {
@@ -470,11 +517,14 @@ class GameScene : IScene {
                         newTexture?.let {
                             // ✅ Only update if `newTexture` is NOT null
                             existingEntity.textureId = it
-                                viewModel.audioManager.playAudio(R.raw.shaking)
+                            viewModel.updateEntity(existingEntity!!)
+                            viewModel.audioManager.playAudio(R.raw.shaking)
                             println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
 
                             // ✅ Delete the second entity off-screen
+                            viewModel.deleteEntity(draggingEntity!!.id)
                             deleteEntity(draggingEntity!!)
+                            
                             println("Dragged entity deleted after merging.")
                         } ?: run {
                             println("No further upgrades available.")
@@ -496,10 +546,12 @@ class GameScene : IScene {
                                         cellWidth,
                                         cellHeight
                                     )
+                                viewModel.updateEntity(draggingEntity!!)
 
                                 println("Cell occupied! Moved entity to nearest empty cell ($newX, $newY)")
                             } else {
-                                draggingEntity!!.position = ori_pos.copyOf()
+                                draggingEntity!!.position = ori_pos.toMutableList()
+                                
                                 println("No empty cells nearby! Returning entity to original position ($previousX, $previousY).")
                             }
                         }
@@ -514,29 +566,36 @@ class GameScene : IScene {
                         if (pair == setOf(R.drawable.strawberry, R.drawable.sponge)) {
                             existingEntity.textureId = R.drawable.strawberrcake
                             viewModel.audioManager.playAudio(R.raw.sparkle)
+                            viewModel.updateEntity(existingEntity!!)
                             println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
 
                             // ✅ Delete the second entity off-screen
+                            viewModel.deleteEntity(draggingEntity!!.id)
                             deleteEntity(draggingEntity!!)
+                            
                             println("Dragged entity deleted after merging.")
                         } else if (pair == setOf(R.drawable.wrapper, R.drawable.muffin)) {
                             viewModel.audioManager.playAudio(R.raw.sparkle)
                             existingEntity.textureId = R.drawable.cupcake
-
+                            viewModel.updateEntity(existingEntity!!)
                             println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
 
                             // ✅ Delete the second entity off-screen
+                            viewModel.deleteEntity(draggingEntity!!.id)
                             deleteEntity(draggingEntity!!)
+                            
                             println("Dragged entity deleted after merging.")
                         } else if (pair == setOf(R.drawable.vanilla, R.drawable.cup)) {
                             viewModel.audioManager.playAudio(R.raw.sparkle)
                             //change in the future
                             existingEntity.textureId = R.drawable.latte
-
+                            viewModel.updateEntity(existingEntity!!)
                             println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
 
                             // ✅ Delete the second entity off-screen
+                            viewModel.deleteEntity(draggingEntity!!.id)
                             deleteEntity(draggingEntity!!)
+                            
                             println("Dragged entity deleted after merging.")
                         } else {
                             // Search for the nearest available cell, excluding the dragging entity itself
@@ -556,10 +615,14 @@ class GameScene : IScene {
                                         cellWidth,
                                         cellHeight
                                     )
+
+                                viewModel.updateEntity(draggingEntity!!)
+                                
                                 viewModel.audioManager.playAudio(R.raw.scoop2)
                                 println("Cell occupied! Moved entity to nearest empty cell ($newX, $newY)")
                             } else {
-                                draggingEntity!!.position = ori_pos.copyOf()
+                                draggingEntity!!.position = ori_pos.toMutableList()
+                                
                                 println("No empty cells nearby! Returning entity to original position ($previousX, $previousY).")
                             }
                         }
@@ -572,6 +635,7 @@ class GameScene : IScene {
         draggingEntity = null
         isDragging = false
         isHolding = false
+
     }
 
 
@@ -609,10 +673,10 @@ class GameScene : IScene {
         return null
     }
 
-    fun getCellCenter(xIndex: Int, yIndex: Int, gridMinX: Float, gridMinY: Float, cellWidth: Float, cellHeight: Float): FloatArray {
+    fun getCellCenter(xIndex: Int, yIndex: Int, gridMinX: Float, gridMinY: Float, cellWidth: Float, cellHeight: Float): MutableList<Float> {
         val centerX = gridMinX + (xIndex + 0.5f) * cellWidth
         val centerY = gridMinY + (yIndex + 0.5f) * cellHeight
-        return floatArrayOf(centerX, centerY, 0f) // Z-coordinate is 0
+        return mutableListOf(centerX, centerY, 0f) // Z-coordinate is 0
     }
 
     fun addEntityToCell(xIndex: Int, yIndex: Int, textureId: Int) {
@@ -620,8 +684,14 @@ class GameScene : IScene {
             val cellCenter = getCellCenter(xIndex, yIndex, gridMinX, gridMinY, cellWidth, cellHeight)
             val entity = entityManager.createEntity(textureId)
             entity.position = cellCenter
-            entity.scale = floatArrayOf(0.07f, 0.07f, 1f)
+            entity.scale = mutableListOf(0.07f, 0.07f, 1f)
             entities.add(entity)
+
+            if (firstRun)
+            {
+                viewModel.addEntity(entity)
+                println("✅ temp entity count after adding: " + temp_entities.count())
+            }
 
             println("✅ Entity Created at ($xIndex, $yIndex) with Texture ID: $textureId")
         }
@@ -634,7 +704,6 @@ class GameScene : IScene {
     fun getEntityByTextureId(textureId: Int): Entity? {
         return entities.find { it.textureId == textureId }
     }
-
 
     fun findNextAvailableGridCellNearProducer(producer: Entity): Pair<Int, Int> {
         val producerX = ((producer.position[0] - gridMinX) / cellWidth).toInt()

@@ -78,18 +78,18 @@ class ShopScene : IScene {
 
         //plate
         plate  =entityManager.createEntity(R.drawable.plate)
-        plate.position = floatArrayOf(-0.33f, 0.41f, 0f)
-        plate.scale = floatArrayOf(0.15f, 0.1f, 0.1f)
+        plate.position = mutableListOf(-0.33f, 0.41f, 0f)
+        plate.scale = mutableListOf(0.15f, 0.1f, 0.1f)
         entities.add(plate)
 
         plate  =entityManager.createEntity(R.drawable.plate)
-        plate.position = floatArrayOf(-0.15f, 0.41f, 0f)
-        plate.scale = floatArrayOf(0.15f, 0.1f, 0.1f)
+        plate.position = mutableListOf(-0.15f, 0.41f, 0f)
+        plate.scale = mutableListOf(0.15f, 0.1f, 0.1f)
         entities.add(plate)
 
         plate  =entityManager.createEntity(R.drawable.plate)
-        plate.position = floatArrayOf(0.03f, 0.41f, 0f)
-        plate.scale = floatArrayOf(0.15f, 0.1f, 0.1f)
+        plate.position = mutableListOf(0.03f, 0.41f, 0f)
+        plate.scale = mutableListOf(0.15f, 0.1f, 0.1f)
         entities.add(plate)
 
 //        repeat(1) { index ->
@@ -103,50 +103,50 @@ class ShopScene : IScene {
 //        }
 
         toGameSceneButton = entityManager.createEntity(R.drawable.bakery)
-        toGameSceneButton.position = floatArrayOf(0.3f, -0.87f, 0f)
-        toGameSceneButton.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
+        toGameSceneButton.position = mutableListOf(0.3f, -0.87f, 0f)
+        toGameSceneButton.scale = mutableListOf(0.22f, 0.22f, 0.25f)
         entities.add(toGameSceneButton)
 
         //tables
         table  =entityManager.createEntity(R.drawable.table)
-        table.position = floatArrayOf(-0.16f, -0.1f, 0f)
-        table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
+        table.position = mutableListOf(-0.16f, -0.1f, 0f)
+        table.scale = mutableListOf(0.22f, 0.22f, 0.25f)
         table.layerId = 1u
         entities.add(table)
         table  =entityManager.createEntity(R.drawable.table)
-        table.position = floatArrayOf(-0.16f, -0.5f, 0f)
-        table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
+        table.position = mutableListOf(-0.16f, -0.5f, 0f)
+        table.scale = mutableListOf(0.22f, 0.22f, 0.25f)
         table.layerId = 1u
         entities.add(table)
         table  =entityManager.createEntity(R.drawable.table)
-        table.position = floatArrayOf(0.16f, -0.1f, 0f)
-        table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
+        table.position = mutableListOf(0.16f, -0.1f, 0f)
+        table.scale = mutableListOf(0.22f, 0.22f, 0.25f)
         table.layerId = 1u
         entities.add(table)
         table  =entityManager.createEntity(R.drawable.table)
-        table.position = floatArrayOf(0.16f, -0.5f, 0f)
-        table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
+        table.position = mutableListOf(0.16f, -0.5f, 0f)
+        table.scale = mutableListOf(0.22f, 0.22f, 0.25f)
         table.layerId = 1u
         entities.add(table)
 
 
         //add food items
         cake =  entityManager.createEntity(R.drawable.strawberrcake)
-        //cake.position = floatArrayOf(-0.325f, 0.45f, 0f)
-        cake.position = floatArrayOf(-1f, -1f, 0f)
-        cake.scale = floatArrayOf(0.14f, 0.14f, 0.14f)
+        //cake.position = mutableListOf(-0.325f, 0.45f, 0f)
+        cake.position = mutableListOf(-1f, -1f, 0f)
+        cake.scale = mutableListOf(0.14f, 0.14f, 0.14f)
         entities.add(cake)
 
         cupcake =  entityManager.createEntity(R.drawable.cupcake)
         //cupcake.position = floatArrayOf(-0.155f, 0.435f, 0f)
-        cupcake.position = floatArrayOf(-1f, -1f, 0f)
-        cupcake.scale = floatArrayOf(0.14f, 0.14f, 0.14f)
+        cupcake.position = mutableListOf(-1f, -1f, 0f)
+        cupcake.scale = mutableListOf(0.14f, 0.14f, 0.14f)
         entities.add(cupcake)
 
         latte =  entityManager.createEntity(R.drawable.latte)
         //latte.position = floatArrayOf(0.03f, 0.445f, 0f)
-        latte.position = floatArrayOf(-1f, -1f, 0f)
-        latte.scale = floatArrayOf(0.14f, 0.14f, 0.14f)
+        latte.position = mutableListOf(-1f, -1f, 0f)
+        latte.scale = mutableListOf(0.14f, 0.14f, 0.14f)
         entities.add(latte)
 
         // Initialize TextBG
@@ -187,8 +187,8 @@ class ShopScene : IScene {
         viewModel.addTextInfo(coinsText)
 
         coinIcon = entityManager.createEntity(R.drawable.coin)
-        coinIcon.position = floatArrayOf(0.23f, 0.85f, 0f)
-        coinIcon.scale = floatArrayOf(0.07f, 0.07f, 0.07f)
+        coinIcon.position = mutableListOf(0.23f, 0.85f, 0f)
+        coinIcon.scale = mutableListOf(0.07f, 0.07f, 0.07f)
         entities.add(coinIcon)
 
         // 🪙 Observe changes in coins LiveData and update UI
@@ -237,8 +237,8 @@ class ShopScene : IScene {
 
             // Create customer
             val customer = entityManager.createEntity(R.drawable.catfront)
-            customer.position = path[0] // Start at entry point
-            customer.scale = floatArrayOf(0.2f, 0.25f, 1f)
+            customer.position = path[0].toMutableList() // Start at entry point
+            customer.scale = mutableListOf(0.2f, 0.2f, 1f)
             entities.add(customer)
 
             customer.userData["selectedFood"] = selectedFood
@@ -318,10 +318,10 @@ class ShopScene : IScene {
             while (t < 1f) {
                 delay(16) // Approx. 60 FPS
                 t += 0.0167f * (1 / duration)
-                entity.position = interpolate(start, end, t)
+                entity.position = interpolate(start, end, t).toMutableList()
             }
 
-            entity.position = end
+            entity.position = end.toMutableList()
         }
 
         onComplete?.invoke()
@@ -339,7 +339,7 @@ class ShopScene : IScene {
         coinsText.text = "${viewModel.coins.value ?: 0u}"
 
         if(viewModel.isFoodItemExists("cake")){
-            cake.position = floatArrayOf(-0.325f, 0.45f, 0f)
+            cake.position = mutableListOf(-0.325f, 0.45f, 0f)
 
             // Update cakeCount
             Handler(Looper.getMainLooper()).post {
@@ -351,11 +351,11 @@ class ShopScene : IScene {
             }
         }
         else{
-            cake.position = floatArrayOf(-10f, -10f, 0f)
+            cake.position = mutableListOf(-10f, -10f, 0f)
         }
 
         if(viewModel.isFoodItemExists("cupcake")){
-            cupcake.position = floatArrayOf(-0.155f, 0.435f, 0f)
+            cupcake.position = mutableListOf(-0.155f, 0.435f, 0f)
 
             // Update cupcakeCount
             Handler(Looper.getMainLooper()).post {
@@ -367,11 +367,11 @@ class ShopScene : IScene {
             }
         }
         else if (viewModel.getFoodItemCount("cupcake") == 0){
-            cupcake.position = floatArrayOf(-10f, -10f, 0f)
+            cupcake.position = mutableListOf(-10f, -10f, 0f)
         }
 
         if(viewModel.isFoodItemExists("latte")){
-            latte.position = floatArrayOf(0.03f, 0.445f, 0f)
+            latte.position = mutableListOf(0.03f, 0.445f, 0f)
 
             // Update latteCount
             Handler(Looper.getMainLooper()).post {
@@ -383,7 +383,7 @@ class ShopScene : IScene {
             }
         }
         else if (viewModel.getFoodItemCount("latte") == 0){
-            latte.position = floatArrayOf(-10f, -10f, 0f)
+            latte.position = mutableListOf(-10f, -10f, 0f)
         }
 
         synchronized(entities) {
@@ -411,7 +411,7 @@ class ShopScene : IScene {
                 val t = progress - segmentIndex
                 val start = path[segmentIndex % path.size]
                 val end = path[(segmentIndex + 1) % path.size]
-                entity.position = interpolate(start, end, t)
+                entity.position = interpolate(start, end, t).toMutableList()
 
                 // Update progress in user data
                 entity.userData["progress"] = progress

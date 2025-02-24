@@ -121,6 +121,11 @@ class MainViewModel() : ViewModel() {
         database.updateUserCoins(currentUserId, newCoins.toInt()) // Sync with database
     }
 
+    fun getUser(userId: String, onSuccess: (Map<String, Any?>?) -> Unit, onFailure: (Exception) -> Unit) {
+        database.getUser(userId, onSuccess, onFailure)
+        currentUserId = userId
+    }
+
     /** Retrieve Coins from Firebase **/
     fun getCurrentUserCoins() {
         getUser(currentUserId, { userData ->
@@ -152,11 +157,22 @@ class MainViewModel() : ViewModel() {
         }
     }
 
-    fun getUser(userId: String, onSuccess: (Map<String, Any?>?) -> Unit, onFailure: (Exception) -> Unit) {
-        database.getUser(userId, onSuccess, onFailure)
-        currentUserId = userId
+    fun addEntity(entity: Entity) {
+        database.addEntity(currentUserId, entity)
     }
 
+    fun deleteEntity(entityId: String) {
+        database.deleteEntity(currentUserId, entityId)
+    }
+
+    fun updateEntity(entity: Entity) {
+        database.updateEntity(currentUserId, entity)
+    }
+
+    fun loadEntities(entityList: MutableList<Entity>, onSuccess: () -> Unit, onFailure: (Exception) -> Unit
+    ) {
+        database.loadEntities(currentUserId, entityList, onSuccess, onFailure)
+    }
     fun getAllUsers(onSuccess: (List<Map<String, Any?>>) -> Unit, onFailure: (Exception) -> Unit) {
         database.getAllUsers(onSuccess, onFailure)
     }
