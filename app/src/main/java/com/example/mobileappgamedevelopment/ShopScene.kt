@@ -111,18 +111,22 @@ class ShopScene : IScene {
         table  =entityManager.createEntity(R.drawable.table)
         table.position = floatArrayOf(-0.16f, -0.1f, 0f)
         table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
+        table.layerId = 1u
         entities.add(table)
         table  =entityManager.createEntity(R.drawable.table)
         table.position = floatArrayOf(-0.16f, -0.5f, 0f)
         table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
+        table.layerId = 1u
         entities.add(table)
         table  =entityManager.createEntity(R.drawable.table)
         table.position = floatArrayOf(0.16f, -0.1f, 0f)
         table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
+        table.layerId = 1u
         entities.add(table)
         table  =entityManager.createEntity(R.drawable.table)
         table.position = floatArrayOf(0.16f, -0.5f, 0f)
         table.scale = floatArrayOf(0.22f, 0.22f, 0.25f)
+        table.layerId = 1u
         entities.add(table)
 
 
@@ -234,7 +238,7 @@ class ShopScene : IScene {
             // Create customer
             val customer = entityManager.createEntity(R.drawable.catfront)
             customer.position = path[0] // Start at entry point
-            customer.scale = floatArrayOf(0.2f, 0.2f, 1f)
+            customer.scale = floatArrayOf(0.2f, 0.25f, 1f)
             entities.add(customer)
 
             customer.userData["selectedFood"] = selectedFood
