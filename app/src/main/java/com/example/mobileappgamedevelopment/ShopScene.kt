@@ -111,22 +111,22 @@ class ShopScene : IScene {
         table  =entityManager.createEntity(R.drawable.table)
         table.position = mutableListOf(-0.16f, -0.1f, 0f)
         table.scale = mutableListOf(0.22f, 0.22f, 0.25f)
-        table.layerId = 1u
+        table.layerId = 1
         entities.add(table)
         table  =entityManager.createEntity(R.drawable.table)
         table.position = mutableListOf(-0.16f, -0.5f, 0f)
         table.scale = mutableListOf(0.22f, 0.22f, 0.25f)
-        table.layerId = 1u
+        table.layerId = 1
         entities.add(table)
         table  =entityManager.createEntity(R.drawable.table)
         table.position = mutableListOf(0.16f, -0.1f, 0f)
         table.scale = mutableListOf(0.22f, 0.22f, 0.25f)
-        table.layerId = 1u
+        table.layerId = 1
         entities.add(table)
         table  =entityManager.createEntity(R.drawable.table)
         table.position = mutableListOf(0.16f, -0.5f, 0f)
         table.scale = mutableListOf(0.22f, 0.22f, 0.25f)
-        table.layerId = 1u
+        table.layerId = 1
         entities.add(table)
 
 
@@ -151,8 +151,8 @@ class ShopScene : IScene {
 
         // Initialize TextBG
         textBG = entityManager.createEntity(R.drawable.app_bg)
-        textBG.scale = floatArrayOf(0.2f, 0.12f, 0.2f)
-        textBG.position = floatArrayOf(-1f, 1f, 0f)
+        textBG.scale = mutableListOf(0.2f, 0.12f, 0.2f)
+        textBG.position = mutableListOf(-1f, 1f, 0f)
         entities.add(textBG)
 
         foodItemText = TextInfo("hello")
@@ -432,8 +432,8 @@ class ShopScene : IScene {
 
             // Click on cake to display quantity
             if (cake.contains(normalizedX, normalizedY)) {
-                textBG.scale = floatArrayOf(0.2f, 0.12f, 0.2f)
-                textBG.position = floatArrayOf(-0.33f, 0.56f, 0f)
+                textBG.scale = mutableListOf(0.2f, 0.12f, 0.2f)
+                textBG.position = mutableListOf(-0.33f, 0.56f, 0f)
 
                 foodItemText.text = "CAKE"
                 foodItemText.offsetX = -155.dp
@@ -443,8 +443,8 @@ class ShopScene : IScene {
                 cakeCount.offsetY = (-250).dp
             }
             else if (cupcake.contains(normalizedX, normalizedY)) {
-                textBG.scale = floatArrayOf(0.27f, 0.12f, 0.2f)
-                textBG.position = floatArrayOf(-0.16f, 0.56f, 0f)
+                textBG.scale = mutableListOf(0.27f, 0.12f, 0.2f)
+                textBG.position = mutableListOf(-0.16f, 0.56f, 0f)
 
                 foodItemText.text = "CUPCAKE"
                 foodItemText.offsetX = -75.dp
@@ -454,8 +454,8 @@ class ShopScene : IScene {
                 cupcakeCount.offsetY = (-250).dp
             }
             else if (latte.contains(normalizedX, normalizedY)) {
-                textBG.scale = floatArrayOf(0.2f, 0.12f, 0.2f)
-                textBG.position = floatArrayOf(0.01f, 0.56f, 0f)
+                textBG.scale = mutableListOf(0.2f, 0.12f, 0.2f)
+                textBG.position = mutableListOf(0.01f, 0.56f, 0f)
 
                 foodItemText.text = "LATTE"
                 foodItemText.offsetX = 5.dp
@@ -467,7 +467,7 @@ class ShopScene : IScene {
 
             // Set a timer to hide text after 2 seconds
             Handler(Looper.getMainLooper()).postDelayed({
-                textBG.position = floatArrayOf(-1f, 1f, 0f)
+                textBG.position = mutableListOf(-1f, 1f, 0f)
 
                 foodItemText.offsetX = -500.dp
                 foodItemText.offsetY = (-500).dp

@@ -54,10 +54,11 @@ class Database {
     fun addEntity(userId: String, entity: Entity) {
         val entityData = mapOf(
             "id" to entity.id,
-            "textureId" to entity.textureId,
             "position" to entity.position,
             "scale" to entity.scale,
             "rotation" to entity.rotation,
+            "layerId" to entity.layerId,
+            "textureId" to entity.textureId,
             "userData" to entity.userData
         )
         database.collection(userCollection)
@@ -110,9 +111,11 @@ class Database {
                     for (doc in snapshot.documents) {
                         val entityRef = entitiesRef.document(doc.id)
                         val entityData = mapOf(
+                            "id" to updatedEntity.id,
                             "position" to updatedEntity.position,
                             "scale" to updatedEntity.scale,
                             "rotation" to updatedEntity.rotation,
+                            "layerId" to updatedEntity.layerId,
                             "textureId" to updatedEntity.textureId,
                             "userData" to updatedEntity.userData
                         )

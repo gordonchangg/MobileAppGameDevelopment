@@ -310,7 +310,7 @@ class GameScene : IScene {
         else if (recipeIcon.contains(normalizedX, normalizedY)) {
             viewModel.audioManager.playAudio(R.raw.uiclick)
             recipebook.position = mutableListOf(0.0f, 0.0f, 0f)
-            recipebook.layerId = 1u
+            recipebook.layerId = 1
         }
         else if (recipebook.contains(normalizedX, normalizedY)) {
             viewModel.audioManager.playAudio(R.raw.uiclick)
@@ -319,8 +319,8 @@ class GameScene : IScene {
         }else if(sendToCafe_cake && cake.contains(normalizedX, normalizedY)){
             viewModel.audioManager.playAudio(R.raw.bell)
             val deleteEntity: Entity = getEntityByTextureId(R.drawable.strawberrcake) ?: return
-            viewModel.deleteEntity(deleteEntity.id)
             deleteEntity(deleteEntity)
+            viewModel.deleteEntity(deleteEntity.id)
             
             viewModel.addFoodItem("cake")
             sendToCafe_cake = false
@@ -328,8 +328,8 @@ class GameScene : IScene {
         else if(sendToCafe_cupcake && cupcake.contains(normalizedX, normalizedY)){
             viewModel.audioManager.playAudio(R.raw.bell)
             val deleteEntity: Entity = getEntityByTextureId(R.drawable.cupcake) ?: return
-            viewModel.deleteEntity(deleteEntity.id)
             deleteEntity(deleteEntity)
+            viewModel.deleteEntity(deleteEntity.id)
             
             viewModel.addFoodItem("cupcake")
             sendToCafe_cupcake = false
@@ -337,8 +337,8 @@ class GameScene : IScene {
         else if(sendToCafe_latte && latte.contains(normalizedX, normalizedY)){
             viewModel.audioManager.playAudio(R.raw.bell)
             val deleteEntity: Entity = getEntityByTextureId(R.drawable.latte) ?: return
-            viewModel.deleteEntity(deleteEntity.id)
             deleteEntity(deleteEntity)
+            viewModel.deleteEntity(deleteEntity.id)
             
             viewModel.addFoodItem("latte")
             sendToCafe_latte = false
@@ -517,13 +517,14 @@ class GameScene : IScene {
                         newTexture?.let {
                             // ✅ Only update if `newTexture` is NOT null
                             existingEntity.textureId = it
-                            viewModel.updateEntity(existingEntity!!)
                             viewModel.audioManager.playAudio(R.raw.shaking)
                             println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
 
                             // ✅ Delete the second entity off-screen
-                            viewModel.deleteEntity(draggingEntity!!.id)
                             deleteEntity(draggingEntity!!)
+                            viewModel.deleteEntity(draggingEntity!!.id)
+                            viewModel.updateEntity(existingEntity!!)
+
                             
                             println("Dragged entity deleted after merging.")
                         } ?: run {
@@ -566,35 +567,37 @@ class GameScene : IScene {
                         if (pair == setOf(R.drawable.strawberry, R.drawable.sponge)) {
                             existingEntity.textureId = R.drawable.strawberrcake
                             viewModel.audioManager.playAudio(R.raw.sparkle)
-                            viewModel.updateEntity(existingEntity!!)
+
                             println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
 
+                            deleteEntity(draggingEntity!!)
                             // ✅ Delete the second entity off-screen
                             viewModel.deleteEntity(draggingEntity!!.id)
-                            deleteEntity(draggingEntity!!)
+                            viewModel.updateEntity(existingEntity!!)
                             
                             println("Dragged entity deleted after merging.")
                         } else if (pair == setOf(R.drawable.wrapper, R.drawable.muffin)) {
                             viewModel.audioManager.playAudio(R.raw.sparkle)
                             existingEntity.textureId = R.drawable.cupcake
-                            viewModel.updateEntity(existingEntity!!)
                             println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
 
                             // ✅ Delete the second entity off-screen
-                            viewModel.deleteEntity(draggingEntity!!.id)
                             deleteEntity(draggingEntity!!)
+                            viewModel.deleteEntity(draggingEntity!!.id)
+                            viewModel.updateEntity(existingEntity!!)
                             
                             println("Dragged entity deleted after merging.")
                         } else if (pair == setOf(R.drawable.vanilla, R.drawable.cup)) {
                             viewModel.audioManager.playAudio(R.raw.sparkle)
                             //change in the future
                             existingEntity.textureId = R.drawable.latte
-                            viewModel.updateEntity(existingEntity!!)
+
                             println("Merged! Entity at ($gridX, $gridY) transformed into new texture.")
 
+                            deleteEntity(draggingEntity!!)
                             // ✅ Delete the second entity off-screen
                             viewModel.deleteEntity(draggingEntity!!.id)
-                            deleteEntity(draggingEntity!!)
+                            viewModel.updateEntity(existingEntity!!)
                             
                             println("Dragged entity deleted after merging.")
                         } else {

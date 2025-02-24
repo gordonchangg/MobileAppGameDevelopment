@@ -9,12 +9,11 @@ class Entity(
     var position: MutableList<Float> = mutableListOf(0f, 0f, 0f), // x, y, z
     var scale: MutableList<Float> = mutableListOf(1f, 1f, 1f),     // scaleX, scaleY, scaleZ
     var rotation: Float = 0f,                             // Rotation angle in degrees
-    var layerId: UInt = 0u,
+    var layerId: Int = 0,
     var textureId: Int = 0,                                   // Texture ID
 
     val userData: MutableMap<String, Any?> = mutableMapOf()
 ) {
-    constructor() : this(UUID.randomUUID().toString(), mutableListOf(0f, 0f, 0f), mutableListOf(1f, 1f, 1f), 0f, 0, mutableMapOf())
 
     fun contains(x: Float, y: Float): Boolean {
         val halfWidth = scale[0] / 2
