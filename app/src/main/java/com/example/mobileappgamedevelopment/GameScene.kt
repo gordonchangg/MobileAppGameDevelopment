@@ -271,11 +271,13 @@ class GameScene : IScene {
             cake.textureId = R.drawable.scsendtocafe
             sendToCafe_cake= true
         }
+
         //cupcake
         if(doesEntityExist(R.drawable.cupcake)){
             cupcake.textureId = R.drawable.cupcakesendtocafe
             sendToCafe_cupcake = true
         }
+
         //latte
         if(doesEntityExist(R.drawable.latte)){
             latte.textureId = R.drawable.lattesendtocafe
@@ -350,10 +352,12 @@ class GameScene : IScene {
             viewModel.audioManager.playAudio(R.raw.uiclick)
             recipebook.position = mutableListOf(0.0f, 0.0f, 0f)
             recipebook.layerId = 1
+            viewModel.removeTextInfo(coinsText)
         }
         else if (recipebook.contains(normalizedX, normalizedY)) {
             viewModel.audioManager.playAudio(R.raw.uiclick)
             recipebook.position = mutableListOf(-1.0f, -1.0f, 0f)
+            viewModel.addTextInfo(coinsText)
 
         }else if(sendToCafe_cake && cake.contains(normalizedX, normalizedY)){
             viewModel.audioManager.playAudio(R.raw.bell)
