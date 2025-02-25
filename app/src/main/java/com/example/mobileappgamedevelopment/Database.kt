@@ -21,7 +21,8 @@ class Database {
             "coins" to coins,
             "cake" to cake,
             "cupcake" to cupcake,
-            "latte" to latte
+            "latte" to latte,
+            "imageUrl" to ""
         )
         database.collection(userCollection)
             .document(userId)

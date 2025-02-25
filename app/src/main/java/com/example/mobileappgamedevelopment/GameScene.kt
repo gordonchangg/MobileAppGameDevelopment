@@ -405,7 +405,7 @@ class GameScene : IScene {
                         isHolding = false
                         ori_pos = entity.position.toMutableList()
 
-                        holdHandler.postDelayed(holdRunnable, 85)
+                        holdHandler.postDelayed(holdRunnable, 150)
                         return
                     }
                 }
@@ -805,6 +805,7 @@ class GameScene : IScene {
             val newX = producerX + dx
             val newY = producerY + dy
             if (newX in 0 until gridWidth && newY in 0 until gridHeight && !occupiedCells.contains(newX to newY)) {
+
                 return newX to newY
             }
         }

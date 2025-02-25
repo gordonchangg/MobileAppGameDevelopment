@@ -73,7 +73,7 @@ fun MainScreen(navigationHelper: NavigationHelper, Username: String, viewModel: 
         }
 
 
-        viewModel.currentUserId = Username
+        viewModel.currentUserId = userId
 
         OpengGLComposable(
             modifier = Modifier.
