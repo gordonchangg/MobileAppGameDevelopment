@@ -45,6 +45,78 @@ class MainViewModel() : ViewModel() {
         }
     }
 
+    fun updateCake(cake: Int) {
+        database.updateCake(currentUserId, cake)
+    }
+
+    fun updateCupcake(cupcake: Int) {
+        database.updateCupcake(currentUserId, cupcake)
+    }
+
+    fun updateLatte(latte: Int) {
+        database.updateLatte(currentUserId, latte)
+    }
+
+    fun setFoodItemCount(food: String, count: Int) {
+        _foodItemCounts.value = _foodItemCounts.value.orEmpty().toMutableMap().apply {
+            this[food] = count
+        }
+    }
+
+    fun loadFoodItem(food: String, count: Int) {
+        val currentList = _foodItems.value ?: mutableListOf()
+        currentList.add(food)
+        _foodItems.value = currentList
+
+        val quantityToAdd = count
+
+        _foodItemCounts.value = _foodItemCounts.value?.toMutableMap()?.apply {
+            this[food] = (this[food] ?: 0) + quantityToAdd
+        }
+    }
+
+    fun getCurrentUserDesserts() {
+        getUser(currentUserId, { userData ->
+            val cakeRetrieved = (userData?.get("cake") as? Number)?.toInt() ?: 0
+            val cupcakeRetrieved = (userData?.get("cupcake") as? Number)?.toInt() ?: 0
+            val latteRetrieved = (userData?.get("latte") as? Number)?.toInt() ?: 0
+
+            if (cakeRetrieved > 0) {
+                loadFoodItem("cake", cakeRetrieved)
+                println("Cake updated: ${cakeRetrieved}")
+            } else
+            {
+                setFoodItemCount("cake", 0)
+            }
+
+            if (cupcakeRetrieved > 0)
+            {
+                loadFoodItem("cupcake", cupcakeRetrieved)
+                println("cupcake updated: ${cupcakeRetrieved}")
+            }
+            else
+            {
+                setFoodItemCount("cupcake", 0)
+            }
+
+            if (latteRetrieved > 0)
+            {
+                loadFoodItem("latte", latteRetrieved)
+                println("latte updated: ${latteRetrieved}")
+            }
+            else
+            {
+                setFoodItemCount("latte", 0)
+            }
+
+        }, { error ->
+            println("Error fetching user desserts: ${error.message}")
+            setFoodItemCount("cake", 0)
+            setFoodItemCount("cupcake", 0)
+            setFoodItemCount("latte", 0)
+        })
+    }
+
     fun isFoodItemExists(food: String): Boolean {
         return _foodItems.value?.contains(food) == true
     }
@@ -69,6 +141,18 @@ class MainViewModel() : ViewModel() {
             this[food] = (this[food] ?: 0) + quantityToAdd
         }
 
+        if (food == "cake")
+        {
+            updateCake(5)
+        }
+        else if (food == "cupcake") {
+            updateCupcake(10)
+        }
+        else if (food == "latte")
+        {
+            updateLatte(15)
+        }
+
         println("added ${quantityToAdd} ${food}! current ${food} count = ${getFoodItemCount(food)}")
     }
 
@@ -84,6 +168,19 @@ class MainViewModel() : ViewModel() {
             if (currentCount > 0) {
                 this[food] = currentCount - 1
                 println("removed 1 ${food}! current ${food} count = ${getFoodItemCount(food)}")
+
+                if (food == "cake")
+                {
+                    updateCake(currentCount - 1)
+                }
+                else if (food == "cupcake")
+                {
+                    updateCupcake(currentCount - 1)
+                }
+                else if (food == "latte")
+                {
+                    updateLatte(currentCount - 1)
+                }
             }
         }
     }
@@ -96,6 +193,10 @@ class MainViewModel() : ViewModel() {
             "cupcake" to 0,
             "latte" to 0
         )
+
+        updateCake(0)
+        updateCupcake(0)
+        updateLatte(0)
     }
 
     fun removeTextInfo(textInfo: TextInfo) {
@@ -108,8 +209,8 @@ class MainViewModel() : ViewModel() {
 
     private val database = Database()
 
-    fun addUser(userId: String, email: String, coins: Int) {
-        database.addUser(userId, email, coins)
+    fun addUser(userId: String, email: String, coins: Int, cake: Int, cupcake: Int, latte: Int) {
+        database.addUser(userId, email, coins, cake, cupcake, latte)
     }
 
     fun deleteUser(userId: String) {

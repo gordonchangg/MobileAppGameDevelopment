@@ -63,7 +63,7 @@ fun MainScreen(navigationHelper: NavigationHelper, Username: String, viewModel: 
                     if (userData != null) {
                         coins = (userData["coins"] as? Int) ?: 100 // Update coins if data exists
                     } else {
-                        viewModel.addUser(userId, email, coins) // Add user if not found
+                        viewModel.addUser(userId, email, coins, 0, 0 ,0) // Add user if not found
                     }
                 },
                 onFailure = { exception ->

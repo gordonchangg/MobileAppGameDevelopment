@@ -211,6 +211,8 @@ class ShopScene : IScene {
         coinIcon.scale = mutableListOf(0.07f, 0.07f, 0.07f)
         entities.add(coinIcon)
 
+        viewModel.getCurrentUserCoins()
+
         // 🪙 Observe changes in coins LiveData and update UI
         Handler(Looper.getMainLooper()).post {
             viewModel.coins.observeForever { newCoins ->
@@ -220,6 +222,8 @@ class ShopScene : IScene {
                 viewModel.addTextInfo(coinsText)
             }
         }
+
+        viewModel.getCurrentUserDesserts()
     }
 
     /**

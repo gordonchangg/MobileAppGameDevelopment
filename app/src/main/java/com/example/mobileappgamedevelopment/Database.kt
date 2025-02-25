@@ -15,10 +15,13 @@ class Database {
     private val userCollection = "users"
     private val TAG = "FirebaseHelper"
 
-    fun addUser(userId: String, email: String, coins: Int) {
+    fun addUser(userId: String, email: String, coins: Int, cake: Int, cupcake: Int, latte: Int) {
         val userData = mapOf(
             "email" to email,
-            "coins" to coins
+            "coins" to coins,
+            "cake" to cake,
+            "cupcake" to cupcake,
+            "latte" to latte
         )
         database.collection(userCollection)
             .document(userId)
@@ -167,6 +170,51 @@ class Database {
             }
             .addOnFailureListener { e ->
                 Log.w(TAG, "Error updating user coins", e)
+            }
+    }
+
+    fun updateCake(userId: String, cake: Int) {
+        val updates = mapOf(
+            "cake" to cake
+        )
+        database.collection(userCollection)
+            .document(userId)
+            .update(updates)
+            .addOnSuccessListener {
+                Log.d(TAG, "Cake successfully updated: $userId")
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error updating cake", e)
+            }
+    }
+
+    fun updateCupcake(userId: String, cupcake: Int) {
+        val updates = mapOf(
+            "cupcake" to cupcake
+        )
+        database.collection(userCollection)
+            .document(userId)
+            .update(updates)
+            .addOnSuccessListener {
+                Log.d(TAG, "cupcake successfully updated: $userId")
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error updating cupcake", e)
+            }
+    }
+
+    fun updateLatte(userId: String, latte: Int) {
+        val updates = mapOf(
+            "latte" to latte
+        )
+        database.collection(userCollection)
+            .document(userId)
+            .update(updates)
+            .addOnSuccessListener {
+                Log.d(TAG, "Latte successfully updated: $userId")
+            }
+            .addOnFailureListener { e ->
+                Log.w(TAG, "Error updating latte", e)
             }
     }
 

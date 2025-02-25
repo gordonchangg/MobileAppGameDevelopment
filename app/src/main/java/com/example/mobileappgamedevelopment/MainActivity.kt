@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
 
                     Box(modifier = Modifier.fillMaxSize()) {
                         // Navigation host
-                        NavHost(navController = navController, startDestination = Screen.Main("hoho@gmail.com").route) {
+                        NavHost(navController = navController, startDestination = Screen.Login.route) {
                             composable(Screen.Login.route) {
                                 val navigationHelper = remember { NavigationHelper(navController) }
                                 LoginScreen(navigationHelper = navigationHelper)
