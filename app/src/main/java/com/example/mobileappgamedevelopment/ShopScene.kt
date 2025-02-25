@@ -1,4 +1,8 @@
 package com.example.mobileappgamedevelopment
+/**
+ * @file ShopScene.kt
+ * @brief Defines the ShopScene class, which manages the shop environment, customers, and food items.
+ */
 
 import android.os.Handler
 import android.os.Looper
@@ -10,6 +14,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
+/**
+ * @class ShopScene
+ * @brief Represents the shop scene where players manage customers and food sales.
+ */
 class ShopScene : IScene {
     override val entities: MutableList<Entity> = mutableListOf()
     override lateinit var entityManager: EntityManager
@@ -21,12 +29,20 @@ class ShopScene : IScene {
     private val maxCustomers = 4
     private var spawnIndex = 0
 
+
+    /**
+     * Path followed by customers entering the shop.
+     */
     private val path = listOf(
         floatArrayOf(0.3f, 0.45f, 0f),
         floatArrayOf(0.3f, 0.25f, 0f),
         floatArrayOf(-0.15f, 0.25f, 0f),
     )
 
+
+    /**
+     * Paths from the counter to tables for customer seating.
+     */
     private val pathToTables = listOf(
         listOf(
             floatArrayOf(-0.15f, 0.25f, 0f),
@@ -50,6 +66,7 @@ class ShopScene : IScene {
         )
     )
 
+    // UI Elements and food items
     lateinit var toGameSceneButton: Entity
     lateinit var table: Entity
     lateinit var plate: Entity
@@ -72,6 +89,9 @@ class ShopScene : IScene {
     lateinit var coinIcon: Entity
 
 
+    /**
+     * @brief Initializes the scene, including UI elements and food items.
+     */
     override fun onSurfaceCreated() {
 
         startCustomerSpawner()
@@ -202,6 +222,9 @@ class ShopScene : IScene {
         }
     }
 
+    /**
+     * @brief Handles entering the scene, including resetting UI states.
+     */
     override fun onEnter() {
         Handler(Looper.getMainLooper()).post {
             viewModel.removeTextInfo(coinsText)
@@ -216,6 +239,9 @@ class ShopScene : IScene {
 
     }
 
+    /**
+     * @brief Spawns customers at intervals to simulate shop traffic.
+     */
     private fun startCustomerSpawner() {
         CoroutineScope(Dispatchers.Main).launch {
             while (true) {
@@ -225,6 +251,9 @@ class ShopScene : IScene {
         }
     }
 
+    /**
+     * @brief Spawns a customer, assigns them a food order, and moves them along the path.
+     */
     private fun spawnCustomer() {
         val availableFood = mutableListOf<String>()
 
@@ -306,6 +335,12 @@ class ShopScene : IScene {
         )
     }
 
+    /**
+     * @brief Moves an entity along a predefined path.
+     * @param entity The entity to move.
+     * @param path The path the entity follows.
+     * @param onComplete Optional completion callback.
+     */
     private suspend fun moveEntityAlongPath(entity: Entity, path: List<FloatArray>, onComplete: (() -> Unit)?) {
         if (path.isEmpty()) return // No movement if path is empty
 
@@ -327,6 +362,13 @@ class ShopScene : IScene {
         onComplete?.invoke()
     }
 
+    /**
+     * @brief Interpolates between two positions.
+     * @param start The starting position.
+     * @param end The ending position.
+     * @param t The interpolation factor.
+     * @return The interpolated position.
+     */
     private fun interpolate(start: FloatArray, end: FloatArray, t: Float): FloatArray {
         return floatArrayOf(
             start[0] + (end[0] - start[0]) * t,
@@ -335,6 +377,9 @@ class ShopScene : IScene {
         )
     }
 
+    /**
+     * @brief Updates the scene, including customer and UI updates.
+     */
     override fun update() {
         coinsText.text = "${viewModel.coins.value ?: 0u}"
 
@@ -422,6 +467,11 @@ class ShopScene : IScene {
         entityManager.setBackgroundTexture(R.drawable.shopbg)
     }
 
+    /**
+     * @brief Handles touch interactions with the scene.
+     * @param normalizedX X-coordinate of the touch event.
+     * @param normalizedY Y-coordinate of the touch event.
+     */
     override fun onActionDown(normalizedX: Float, normalizedY: Float) {
         viewModel.audioManager.playAudio(R.raw.uiclick)
         synchronized(entities) {

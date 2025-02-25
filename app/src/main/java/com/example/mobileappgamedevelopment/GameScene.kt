@@ -1,9 +1,19 @@
 package com.example.mobileappgamedevelopment
-
+/**
+ * @file GameScene.kt
+ * @brief Defines the game scene with entities, interactions, and grid-based mechanics.
+ *
+ * This class is responsible for managing the gameplay scene, handling player interactions,
+ * entity movements, merging mechanics, and updating game state based on player actions.
+ */
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.ui.unit.dp
 
+/**
+ * @class GameScene
+ * @brief Implements the game scene logic including entity management, interactions, and updates.
+ */
 class GameScene : IScene {
     override val entities: MutableList<Entity> = mutableListOf()
 
@@ -19,6 +29,7 @@ class GameScene : IScene {
 
     var firstRun = false
 
+    //grid properties
     val gridWidth = 6
     val gridHeight = 6
     val gridMinX = -0.4f
@@ -41,17 +52,20 @@ class GameScene : IScene {
         }
     }
 
+    // Interaction states
     private var draggingEntity: Entity? = null
     private var isDragging = false
     private var isHolding = false
     private val holdHandler = Handler(Looper.getMainLooper())
 
-    //send to cafe booleans
+    // Cafe-related booleans
     private var sendToCafe_cake = false
     private var sendToCafe_cupcake = false
     private var sendToCafe_latte = false
 
-
+    /**
+     * @brief Runnable to detect long-press actions.
+     */
     private val holdRunnable = Runnable {
         if (draggingEntity != null) {
             isHolding = true
@@ -59,6 +73,7 @@ class GameScene : IScene {
         }
     }
 
+    //entities
     lateinit var toShopSceneButton: Entity
     lateinit var latte: Entity
     lateinit var cupcake: Entity
@@ -86,6 +101,9 @@ class GameScene : IScene {
         R.drawable.wheat to listOf(R.drawable.wheat,R.drawable.stackfowheat, R.drawable.flour, R.drawable.sponge, R.drawable.muffin)
     )
 
+    /**
+     * @brief Called when the game surface is created. Initializes entities and game state.
+     */
     override fun onSurfaceCreated() {
         val lightColor = floatArrayOf(0.984f, 0.835f, 0.588f, 1f) // F4D596 (Pale Yellow)
         val darkColor = floatArrayOf(0.859f, 0.694f, 0.475f, 1f) // DB
@@ -222,6 +240,10 @@ class GameScene : IScene {
         viewModel.getCurrentUserCoins()
     }
 
+
+    /**
+     * @brief Called when the scene is entered.
+     */
     override fun onEnter() {
         inScene = true
 
@@ -231,8 +253,14 @@ class GameScene : IScene {
         viewModel.audioManager.playBGM(R.raw.endofdayloop)
     }
 
+    /**
+     * @brief Called when the surface is resized.
+     */
     override fun onSurfaceChanged() {}
 
+    /**
+     * @brief Updates the game logic, entity states, and UI.
+     */
     override fun update() {
         entityManager.setBackgroundTexture(R.drawable.gamescreenbg)
 
@@ -281,6 +309,9 @@ class GameScene : IScene {
         }
     }
 
+    /**
+     * @brief Gets entity image from cell
+     */
     fun getEntityDrawableInCell(xIndex: Int, yIndex: Int): Int? {
         for (entity in entities) {
             val entityX = ((entity.position[0] - gridMinX) / cellWidth).toInt()
@@ -293,12 +324,20 @@ class GameScene : IScene {
         return null // Return null if no entity is found in the cell
     }
 
+    /**
+     * @brief Gets entity index from position
+     */
     fun getCellIndexFromPosition(position: MutableList<Float>): Pair<Int, Int> {
         val xIndex = ((position[0] - gridMinX) / cellWidth).toInt()
         val yIndex = ((position[1] - gridMinY) / cellHeight).toInt()
         return Pair(xIndex, yIndex)
     }
 
+    /**
+     * @brief Handles player touch input.
+     * @param normalizedX X-coordinate of the touch input.
+     * @param normalizedY Y-coordinate of the touch input.
+     */
     override fun onActionDown(normalizedX: Float, normalizedY: Float) {
 
         if (toShopSceneButton.contains(normalizedX, normalizedY)) {
@@ -373,6 +412,10 @@ class GameScene : IScene {
 
     }
 
+
+    /**
+     * @brief gets entity cell
+     */
     fun getEntityInCell(xIndex: Int, yIndex: Int, excludeEntity: Entity? = null): Entity? {
         return entities.find { entity ->
             if (entity == excludeEntity) return@find false  // Exclude the currently held entity
@@ -382,6 +425,9 @@ class GameScene : IScene {
         }
     }
 
+    /**
+     * @brief checks if cell is occupied
+     */
     fun isCellOccupied(xIndex: Int, yIndex: Int, excludeEntity: Entity? = null): Boolean {
         val occupiedCells = entities.filter { it != excludeEntity } // Exclude dragging entity
             .map { entity ->
@@ -396,6 +442,11 @@ class GameScene : IScene {
 
     }
 
+    /**
+     * @brief Moves the selected entity when dragging.
+     * @param normalizedDx Change in X-coordinate.
+     * @param normalizedDy Change in Y-coordinate.
+     */
     override fun onActionMove(normalizedDx: Float, normalizedDy: Float) {
         if (isDragging && draggingEntity != null) {
             draggingEntity!!.position[0] += normalizedDx
@@ -403,6 +454,9 @@ class GameScene : IScene {
         }
     }
 
+    /**
+     * @brief find nearest empty cell
+     */
     fun findNearestEmptyCell(
         startX: Int,
         startY: Int,
@@ -430,7 +484,9 @@ class GameScene : IScene {
         return -1 to -1 // 🚨 No empty space found
     }
 
-
+    /**
+     * @brief Handles the release of a dragged entity and processes merging logic.
+     */
     override fun onActionUp() {
 
         holdHandler.removeCallbacks(holdRunnable) // Stop hold detection
@@ -646,6 +702,9 @@ class GameScene : IScene {
         return mergeChains.entries.find { it.value.contains(currentTexture) }?.key
     }
 
+    /**
+     * @brief gets the next merge texture
+     */
     fun getNextMergeTexture(currentTexture: Int): Int? {
 
         val textureKey = if (currentTexture > 5) getMergeKey(currentTexture) else currentTexture
@@ -676,12 +735,18 @@ class GameScene : IScene {
         return null
     }
 
+    /**
+     * @brief center cell position
+     */
     fun getCellCenter(xIndex: Int, yIndex: Int, gridMinX: Float, gridMinY: Float, cellWidth: Float, cellHeight: Float): MutableList<Float> {
         val centerX = gridMinX + (xIndex + 0.5f) * cellWidth
         val centerY = gridMinY + (yIndex + 0.5f) * cellHeight
         return mutableListOf(centerX, centerY, 0f) // Z-coordinate is 0
     }
 
+    /**
+     * @brief Adds entity to cell
+     */
     fun addEntityToCell(xIndex: Int, yIndex: Int, textureId: Int) {
         if (!isCellOccupied(xIndex, yIndex)) {
             val cellCenter = getCellCenter(xIndex, yIndex, gridMinX, gridMinY, cellWidth, cellHeight)
@@ -700,14 +765,23 @@ class GameScene : IScene {
         }
     }
 
+    /**
+     * @brief checks if entity exist
+     */
     fun doesEntityExist(drawableId: Int): Boolean {
         return entities.any { it.textureId == drawableId }
     }
 
+    /**
+     * @brief gets entity by image
+     */
     fun getEntityByTextureId(textureId: Int): Entity? {
         return entities.find { it.textureId == textureId }
     }
 
+    /**
+     * @brief find available grid cell near the producer entity
+     */
     fun findNextAvailableGridCellNearProducer(producer: Entity): Pair<Int, Int> {
         val producerX = ((producer.position[0] - gridMinX) / cellWidth).toInt()
         val producerY = ((producer.position[1] - gridMinY) / cellHeight).toInt()
