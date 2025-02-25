@@ -72,6 +72,9 @@ fun MainScreen(navigationHelper: NavigationHelper, Username: String, viewModel: 
             )
         }
 
+
+        viewModel.currentUserId = Username
+
         OpengGLComposable(
             modifier = Modifier.
             fillMaxSize(),
